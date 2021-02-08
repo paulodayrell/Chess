@@ -1,20 +1,33 @@
-import sys
-import pygame as pg
+import pygame, sys
+from tabuleiro import *
+from pecas import *
+from pygame.locals import *
+import time
 
-pg.init()
+pygame.init()
 
-BOARD_LENGTH = 8
-size = width, height = 660, 490
-speed = [1.2, 1.2]
-black = 0, 0, 0
+FPS = 60
+framesPerSecond = pygame.time.Clock()
 
-screen = pg.display.set_mode(size)
+BLUE  = (0, 0, 255)
+RED   = (255, 0, 0)
+GREEN = (0, 255, 0)
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
 
-tabuleiro = [[None for x in range(BOARD_LENGTH)]for y in range(BOARD_LENGTH)]
+size = width, height = 1024, 1024
+display = pygame.display.set_mode(size)
+pygame.display.set_caption('Chess')
+display.fill((255,0,0))
 
-while 1:
-    draw_squares(screen)
-    for event in pg.event.get():
-        if event.type == pg.QUIT: sys.exit()
-    screen.fill(black)
-    pg.display.flip()
+tabuleiro = Tabuleiro()
+
+while True:
+    for event in pygame.event.get():
+        if event.type == QUIT:
+            pygame.quit()
+            sys.exit()
+   
+    tabuleiro.draw(display)
+    pygame.display.update()
+    framesPerSecond.tick(FPS)
