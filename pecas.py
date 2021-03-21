@@ -1,38 +1,175 @@
+from abc import ABCMeta, abstractmethod
 import pygame
 
+
 class Peca:
-    def __init__(self, colour, name):
+    def __init__(self, linha, coluna, colour, name, abc=ABCMeta):
+        self.linha = linha
+        self.coluna = coluna
         self.colour = colour
         self.name = name
-        self.image = pygame.image.load("./sprites/128h/" + colour + "_" + name + ".png")
+        self.moved = False
+        self.captured = False
+        self.moves = 0
+        self.image = pygame.image.load(
+            "./sprites/128h/" + colour + "_" + name + ".png")
+
+    @abstractmethod
+    def get_movements(self):
+        pass
+
+    def pode(self, movimento):
+        if movimento[0] >= 0 and movimento[0] < 8 and movimento[1] >= 0 and movimento[1] < 8:
+            return True
+        return False
+
 
 class Rei(Peca):
-    def __init__(self, colour):
-        self.moveset = {(x, y) for x in range(-1, 2) for y in range(-1, 2) if x != 0 or y != 0}
-        super().__init__(colour, 'king')
+    def __init__(self, linha, coluna, colour):
+        self.moveset = {(coluna, linha) for coluna in range(-1, 2)
+                        for linha in range(-1, 2) if coluna != 0 or linha != 0}
+        super().__init__(linha, coluna, colour, 'king')
+
+    def get_movements(self):
+        moveset = []
+        for i in range(-1, 2):
+            for j in range(-1, 2):
+                movimento = [self.linha + i, self.coluna + j]
+                if(self.pode(movimento)):
+                    moveset.append(movimento)
+        return moveset
+
 
 class Rainha(Peca):
-    def __init__(self, colour):
-        self.moveset = {(x, y) for x in range(-1, 2) for y in range(-1, 2) if x != 0 or y != 0}
-        super().__init__(colour, 'queen')
+    def __init__(self, linha, coluna, colour):
+        super().__init__(linha, coluna, colour, 'queen')
+
+    def get_movements(self):
+        moveset = []
+        for i in range(8):
+            if(self.linha != i):
+                moveset.append([i, self.coluna])
+            if(self.coluna != i):
+                moveset.append([self.linha, i])
+
+        move = [self.linha, self.coluna]
+        while True:
+            move = [move[0]-1, move[1]-1]
+            if (not self.pode(move)):
+                break
+            moveset.append(move)
+
+        move = [self.linha, self.coluna]
+        while True:
+            move = [move[0]+1, move[1]-1]
+            if (not self.pode(move)):
+                break
+            moveset.append(move)
+
+        move = [self.linha, self.coluna]
+        while True:
+            move = [move[0]-1, move[1]+1]
+            if (not self.pode(move)):
+                break
+            moveset.append(move)
+
+        move = [self.linha, self.coluna]
+        while True:
+            move = [move[0]+1, move[1]+1]
+            if (not self.pode(move)):
+                break
+            moveset.append(move)
+
+        return moveset
+
 
 class Torre(Peca):
-    def __init__(self, colour):
-        self.moveset = {(x, y) for x in range(-1, 2) for y in range(-1, 2) if (x == 0 or y == 0) and (x != 0 or y != 0)}
-        super().__init__(colour, 'rook')
+    def __init__(self, linha, coluna, colour):
+        super().__init__(linha, coluna, colour, 'rook')
+
+    def get_movements(self):
+        moveset = []
+        for i in range(8):
+            if(self.linha != i):
+                moveset.append([i, self.coluna])
+            if(self.coluna != i):
+                moveset.append([self.linha, i])
+
+        return moveset
+
 
 class Bispo(Peca):
-    def __init__(self, colour):
-        self.moveset = {(x, y) for x in range(-1, 2) for y in range(-1, 2) if x != 0 and y != 0}
-        super().__init__(colour, 'bishop')
+    def __init__(self, linha, coluna, colour):
+        super().__init__(linha, coluna, colour, 'bishop')
+
+    def get_movements(self):
+        moveset = []
+
+        move = [self.linha, self.coluna]
+        while True:
+            move = [move[0]-1, move[1]-1]
+            if (not self.pode(move)):
+                break
+            moveset.append(move)
+
+        move = [self.linha, self.coluna]
+        while True:
+            move = [move[0]+1, move[1]-1]
+            if (not self.pode(move)):
+                break
+            moveset.append(move)
+
+        move = [self.linha, self.coluna]
+        while True:
+            move = [move[0]-1, move[1]+1]
+            if (not self.pode(move)):
+                break
+            moveset.append(move)
+
+        move = [self.linha, self.coluna]
+        while True:
+            move = [move[0]+1, move[1]+1]
+            if (not self.pode(move)):
+                break
+            moveset.append(move)
+
+        return moveset
+
 
 class Cavalo(Peca):
-    def __init__(self, colour):
-        self.moveset = {(x, y) for x in range(-2, 3) for y in range(-2, 3) if x != 0 and y != 0 and abs(x) != abs(y)}
-        super().__init__(colour, 'knight')
+    def __init__(self, linha, coluna, colour):
+        super().__init__(linha, coluna, colour, 'knight')
+
+    def get_movements(self):
+        moveset = [
+            [self.linha+2, self.coluna-1],
+            [self.linha+2, self.coluna+1],
+            [self.linha-2, self.coluna-1],
+            [self.linha-2, self.coluna+1],
+            [self.linha+1, self.coluna+2],
+            [self.linha+1, self.coluna-2],
+            [self.linha-1, self.coluna+2],
+            [self.linha-1, self.coluna-2]
+        ]
+
+        return [m for m in moveset if self.pode(m)]
+
 
 class Peao(Peca):
-    def __init__(self, colour):
+    def __init__(self, linha, coluna, colour):
         self.direction = -1 if colour == 'white' else 1
-        self.moveset = {(0, y * self.direction) for y in range(1, 2)}
-        super().__init__(colour, 'pawn')
+        self.moveset = {(linha * self.direction, 0) for linha in range(1, 2)}
+        super().__init__(linha, coluna, colour, 'pawn')
+
+    def get_movements(self):
+        moveset = []
+
+        direction = -1 if self.colour == 'white' else 1
+
+        if self.moves == 0:
+            for i in range(1, 3):
+                moveset.append([self.linha + i*direction, self.coluna])
+        else:
+            moveset.append([self.linha + direction, self.coluna])
+
+        return moveset
