@@ -5,8 +5,9 @@ import time
 tile_length = 128
 
 class Tabuleiro(pygame.sprite.Sprite):
-    def __init__(self):
+    def __init__(self, display):
         super().__init__() 
+        self.surface = display
         self.dark_square = pygame.image.load("./sprites/128h/square brown dark.png")
         self.light_square = pygame.image.load("./sprites/128h/square brown light.png")
         self.surf = pygame.Surface((tile_length, tile_length))
@@ -45,4 +46,21 @@ class Tabuleiro(pygame.sprite.Sprite):
                 if pecas_tabuleiro[i][j] is not None:
                     surface.blit(pecas_tabuleiro[i][j].image, self.position[i*8+j])
 
-    
+    def loop(self):
+        running = True
+
+        FPS = 60
+        framesPerSecond = pygame.time.Clock()
+
+        while running:
+            for event in pygame.event.get():
+                if event.type == QUIT:
+                    pygame.quit()
+                    sys.exit()
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == 27: # 27 == "ESC"
+                        running = False
+
+            self.draw(self.surface)
+            pygame.display.update()
+            framesPerSecond.tick(FPS)

@@ -1,5 +1,6 @@
 import pygame, sys
 from tabuleiro import *
+from menu import *
 from pecas import *
 from pygame.locals import *
 import time
@@ -20,14 +21,19 @@ display = pygame.display.set_mode(size)
 pygame.display.set_caption('Chess')
 display.fill((255,0,0))
 
-tabuleiro = Tabuleiro()
+tabuleiro = Tabuleiro(display)
+menu = Menu(display, tabuleiro)
 
+menu.loop()
+
+'''
 while True:
     for event in pygame.event.get():
         if event.type == QUIT:
             pygame.quit()
             sys.exit()
    
-    tabuleiro.draw(display)
+    menu.draw(display)
     pygame.display.update()
     framesPerSecond.tick(FPS)
+'''
