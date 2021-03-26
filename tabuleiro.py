@@ -22,6 +22,9 @@ class Tabuleiro(pygame.sprite.Sprite):
         self.pecas_tabuleiro = []
         self.player1 = 'white'
         self.player2 = 'black'
+        
+        self.piece_selected = None #guarda a peca atualmente selecionada
+        self.possible_moves = [] #guarda os movimentos possiveis da peca atualmente selecionada
 
     def reseta_tabuleiro(self):
         def gerar_pecas(cor):
@@ -43,15 +46,198 @@ class Tabuleiro(pygame.sprite.Sprite):
 
         return board
 
+    def get_piece(self, linha, coluna):
+        return self.pecas_tabuleiro[linha][coluna]
+
+    def place_piece(self, peca, linha, coluna):
+        self.pecas_tabuleiro[linha][coluna] = peca
+
+    def remove_piece(self, linha, coluna):
+        self.pecas_tabuleiro[linha][coluna] = None
+
+    #Primeiro clique na peca
+    def set_possible_moves(self, linha, coluna):
+        self.possible_moves = []
+        self.piece_selected = None
+
+        peca = self.get_piece(linha, coluna)
+
+        if peca:
+            #TODO desenhar opcoes de movimento
+
+            self.piece_selected = peca
+            
+            for m in peca.get_movements():
+                if self.can_move(peca, m[0], m[1]):
+                    self.possible_moves.append(m)
+
+    def can_move(self, peca, to_linha, to_coluna):
+
+        target_place = self.get_piece(to_linha, to_linha)
+
+        if peca.name == 'king':
+            if target_place:
+                if target_place.colour == peca.colour:
+                    return False
+        elif peca.name == 'rook':
+            if peca.linha != to_linha: #esta se movimentando entre linhas
+                for i in range(min(peca.linha, to_linha), max(peca.linha, to_linha)+1):
+                    if peca.linha != i and self.get_piece(i, peca.coluna): #Verifica se nao estah na mesma casa da peca
+                        if (i, peca.coluna) == (to_linha, to_coluna): #na casa de destino o teste eh mais estrito
+                            if target_place.colour == peca.colour:
+                                return False
+                        else:
+                            return False
+            elif peca.coluna != to_coluna: #esta se movimentando entre colunas
+                for i in range(min(peca.coluna, to_coluna), max(peca.coluna, to_coluna)+1):
+                    if peca.coluna != i and self.get_piece(peca.linha, i):
+                        if (peca.linha, i) == (to_linha, to_coluna): #na casa de destino o teste eh mais estrito
+                            if target_place.colour == peca.colour:
+                                return False
+                        else:
+                            return False
+            else:
+                return False
+        elif peca.name == 'bishop':
+
+            difference_linha = to_linha - peca.linha
+            difference_coluna = to_coluna - peca.coluna
+
+            soma_linha = 0
+            soma_coluna = 0
+
+            # -+ direita superior
+            # -- esquerda superior
+            # ++ direita inferior
+            # +- esquerda inferior
+            if difference_linha < 0:
+                soma_linha = -1
+            elif difference_linha > 0:
+                soma_linha = 1
+            else:
+                return False
+            if difference_coluna < 0:
+                soma_coluna = -1
+            elif difference_coluna > 0:
+                soma_coluna = 1
+            else:
+                return False
+
+            test_place = [peca.linha, peca.coluna] 
+
+            while (test_place[0], test_place[1]) != (to_linha, to_coluna):
+                test_place = [test_place[0]+soma_linha, test_place[1]+soma_coluna]
+                if self.get_piece(test_place[0], test_place[1]):
+                    if to_linha == test_place[0] and to_coluna == test_place[1]:
+                        if target_place and target_place.colour == peca.colour:
+                            return False
+                    else:
+                        return False
+
+        elif peca.name == 'knight':
+            
+            if target_place and target_place.colour == peca.colour:
+                return False
+
+        elif peca.name == 'pawn':
+
+            difference_linha = to_linha - peca.linha
+            difference_coluna = to_coluna - peca.coluna
+
+            #Se eh um movimento diagonal
+            if (difference_linha < 0 and difference_coluna < 0) or (difference_linha > 0 and difference_coluna > 0) or (difference_linha > 0 and difference_coluna < 0) or (difference_linha < 0 and difference_coluna > 0):
+                if target_place: #Testa captura
+                    if target_place.colour == peca.colour:
+                        return False
+                else:
+                    return False
+
+            if peca.colour == "black":
+                if self.get_piece(to_linha, to_coluna) and self.get_piece(to_linha, to_coluna).colour == peca.colour:
+                    return False
+                if difference_linha > 1:
+                    if self.get_piece(peca.linha+1, to_coluna):
+                        return False
+            else:
+                if self.get_piece(to_linha, to_coluna) and self.get_piece(to_linha, to_coluna).colour == peca.colour:
+                    return False
+                if difference_linha < -1:
+                    if self.get_piece(peca.linha-1, to_coluna):
+                        return False
+
+        elif peca.name == 'queen':
+
+            if (peca.linha != to_linha and peca.coluna != to_coluna):
+                difference_linha = to_linha - peca.linha
+                difference_coluna = to_coluna - peca.coluna
+
+                soma_linha = 0
+                soma_coluna = 0
+
+                # -+ direita superior
+                # -- esquerda superior
+                # ++ direita inferior
+                # +- esquerda inferior
+                if difference_linha < 0:
+                    soma_linha = -1
+                elif difference_linha > 0:
+                    soma_linha = 1
+                else:
+                    return False
+                if difference_coluna < 0:
+                    soma_coluna = -1
+                elif difference_coluna > 0:
+                    soma_coluna = 1
+                else:
+                    return False
+
+                test_place = [peca.linha, peca.coluna] 
+
+                while (test_place[0], test_place[1]) != (to_linha, to_coluna):
+                    test_place = [test_place[0]+soma_linha, test_place[1]+soma_coluna]
+                    if self.get_piece(test_place[0], test_place[1]):
+                        if to_linha == test_place[0] and to_coluna == test_place[1]:
+                            if target_place and target_place.colour == peca.colour:
+                                return False
+                        else:
+                            return False
+            else: #movimento de torre
+                if peca.linha != to_linha: #esta se movimentando entre linhas
+                    for i in range(min(peca.linha, to_linha), max(peca.linha, to_linha)+1):
+                        if peca.linha != i and self.get_piece(i, peca.coluna): #Verifica se nao estah na mesma casa da peca
+                            if (i, peca.coluna) == (to_linha, to_coluna): #na casa de destino o teste eh mais estrito
+                                if target_place.colour == peca.colour:
+                                    return False
+                            else:
+                                return False
+                elif peca.coluna != to_coluna: #esta se movimentando entre colunas
+                    for i in range(min(peca.coluna, to_coluna), max(peca.coluna, to_coluna)+1):
+                        if peca.coluna != i and self.get_piece(peca.linha, i):
+                            if (peca.linha, i) == (to_linha, to_coluna): #na casa de destino o teste eh mais estrito
+                                if target_place.colour == peca.colour:
+                                    return False
+                            else:
+                                return False
+                else:
+                    return False
+
+
+
+        return True
+
     def draw(self, surface):
         colour_dict = {True: self.light_square, False: self.dark_square}
         current_colour = True
+
 
         for i in range(len(self.position)):
             if i % 8 != 0:
                 current_colour = not current_colour
             surface.blit(colour_dict[current_colour], self.position[i])
-
+            for pm in self.possible_moves:
+                if((self.position[i][1]//tile_length, self.position[i][0]//tile_length) == (pm[0], pm[1])):
+                    pygame.draw.circle(surface, pygame.Color(0,0,0,220), (self.position[i][0]+tile_length/2, self.position[i][1]+tile_length/2), tile_length/4)
+        
         self.pecas_tabuleiro = self.reseta_tabuleiro()
 
         for i in range(8):
@@ -88,6 +274,13 @@ class Tabuleiro(pygame.sprite.Sprite):
                         print(self.pecas_tabuleiro[linha][coluna].name)
                         print(self.pecas_tabuleiro[linha]
                               [coluna].get_movements())
+                        
+                        self.set_possible_moves(linha, coluna)
+                        # print(self.possible_moves)
+                        
+                        # for i in range(8):
+                        #     for j in range(8):
+                        #         print(i,j,self.can_move(self.pecas_tabuleiro[linha][coluna], i,j))
                         # for button in self.buttons:
                         #     if(button.buttonX < x and button.buttonX + button.buttonW > x and button.buttonY < y and button.buttonY + button.buttonH > y):
                         #         button.click()
