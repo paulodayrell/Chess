@@ -3,7 +3,7 @@ import pygame
 
 
 class Peca:
-    def __init__(self, linha, coluna, colour, name, abc=ABCMeta):
+    def __init__(self, linha, coluna, colour, name, tile_length, abc=ABCMeta):
         self.linha = linha
         self.coluna = coluna
         self.colour = colour
@@ -13,6 +13,8 @@ class Peca:
         self.moves = 0
         self.image = pygame.image.load(
             "./sprites/128h/" + colour + "_" + name + ".png")
+        self.tile_length = tile_length
+        self.image = pygame.transform.scale(self.image, (tile_length, tile_length))
 
     def __str__(self):
         print("Nome: ", self.name)
@@ -31,10 +33,10 @@ class Peca:
 
 
 class Rei(Peca):
-    def __init__(self, linha, coluna, colour):
+    def __init__(self, linha, coluna, colour, tile_length):
         self.moveset = {(coluna, linha) for coluna in range(-1, 2)
                         for linha in range(-1, 2) if coluna != 0 or linha != 0}
-        super().__init__(linha, coluna, colour, 'king')
+        super().__init__(linha, coluna, colour, 'king', tile_length)
 
     def get_movements(self):
         moveset = []
@@ -47,8 +49,8 @@ class Rei(Peca):
 
 
 class Rainha(Peca):
-    def __init__(self, linha, coluna, colour):
-        super().__init__(linha, coluna, colour, 'queen')
+    def __init__(self, linha, coluna, colour, tile_length):
+        super().__init__(linha, coluna, colour, 'queen', tile_length)
 
     def get_movements(self):
         moveset = []
@@ -90,8 +92,8 @@ class Rainha(Peca):
 
 
 class Torre(Peca):
-    def __init__(self, linha, coluna, colour):
-        super().__init__(linha, coluna, colour, 'rook')
+    def __init__(self, linha, coluna, colour, tile_length):
+        super().__init__(linha, coluna, colour, 'rook', tile_length)
 
     def get_movements(self):
         moveset = []
@@ -105,8 +107,8 @@ class Torre(Peca):
 
 
 class Bispo(Peca):
-    def __init__(self, linha, coluna, colour):
-        super().__init__(linha, coluna, colour, 'bishop')
+    def __init__(self, linha, coluna, colour, tile_length):
+        super().__init__(linha, coluna, colour, 'bishop', tile_length)
 
     def get_movements(self):
         moveset = []
@@ -143,8 +145,8 @@ class Bispo(Peca):
 
 
 class Cavalo(Peca):
-    def __init__(self, linha, coluna, colour):
-        super().__init__(linha, coluna, colour, 'knight')
+    def __init__(self, linha, coluna, colour, tile_length):
+        super().__init__(linha, coluna, colour, 'knight', tile_length)
 
     def get_movements(self):
         moveset = [
@@ -162,10 +164,10 @@ class Cavalo(Peca):
 
 
 class Peao(Peca):
-    def __init__(self, linha, coluna, colour):
+    def __init__(self, linha, coluna, colour, tile_length):
         self.direction = -1 if colour == 'white' else 1
         self.moveset = {(linha * self.direction, 0) for linha in range(1, 2)}
-        super().__init__(linha, coluna, colour, 'pawn')
+        super().__init__(linha, coluna, colour, 'pawn', tile_length)
 
     def get_movements(self):
         moveset = []

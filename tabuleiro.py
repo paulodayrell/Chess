@@ -4,8 +4,9 @@ import pecas
 from pygame.locals import *
 import time
 from Player import Player
+from config import *
 
-tile_length = 128
+tile_length = 64
 
 class Tabuleiro(pygame.sprite.Sprite):
     def __init__(self, display):
@@ -34,19 +35,19 @@ class Tabuleiro(pygame.sprite.Sprite):
     def reseta_tabuleiro(self):
         def gerar_pecas(cor):
             if cor == "black":
-                return [pecas.Torre(0, 0, cor), pecas.Cavalo(0, 1, cor), pecas.Bispo(0, 2, cor), pecas.Rainha(0, 3, cor),
-                        pecas.Rei(0, 4, cor), pecas.Bispo(0, 5, cor), pecas.Cavalo(0, 6, cor), pecas.Torre(0, 7, cor)]
+                return [pecas.Torre(0, 0, cor, tile_length), pecas.Cavalo(0, 1, cor, tile_length), pecas.Bispo(0, 2, cor, tile_length), pecas.Rainha(0, 3, cor, tile_length),
+                        pecas.Rei(0, 4, cor, tile_length), pecas.Bispo(0, 5, cor, tile_length), pecas.Cavalo(0, 6, cor, tile_length), pecas.Torre(0, 7, cor, tile_length)]
             else:
-                return [pecas.Torre(7, 0, cor), pecas.Cavalo(7, 1, cor), pecas.Bispo(7, 2, cor), pecas.Rainha(7, 3, cor),
-                        pecas.Rei(7, 4, cor), pecas.Bispo(7, 5, cor), pecas.Cavalo(7, 6, cor), pecas.Torre(7, 7, cor)]
+                return [pecas.Torre(7, 0, cor, tile_length), pecas.Cavalo(7, 1, cor, tile_length), pecas.Bispo(7, 2, cor, tile_length), pecas.Rainha(7, 3, cor, tile_length),
+                        pecas.Rei(7, 4, cor, tile_length), pecas.Bispo(7, 5, cor, tile_length), pecas.Cavalo(7, 6, cor, tile_length), pecas.Torre(7, 7, cor, tile_length)]
 
         board = [[None for x in range(8)] for x in range(8)]
 
         board[0] = gerar_pecas("black")
         board[7] = gerar_pecas("white")
-        board[1] = [pecas.Peao(1, index, "black")
+        board[1] = [pecas.Peao(1, index, "black", tile_length)
                     for index, square in enumerate(board[1])]
-        board[6] = [pecas.Peao(6, index, "white")
+        board[6] = [pecas.Peao(6, index, "white", tile_length)
                     for index, square in enumerate(board[6])]
 
         return board
@@ -56,10 +57,12 @@ class Tabuleiro(pygame.sprite.Sprite):
 
     def place_piece(self, peca, linha, coluna):
         self.pecas_tabuleiro[linha][coluna] = peca
+        peca.linha = linha
+        peca.coluna = coluna
 
     def remove_piece(self, linha, coluna):
         self.pecas_tabuleiro[linha][coluna] = None
-
+        
     #Primeiro clique na peca
     def set_possible_moves(self, linha, coluna):
         self.possible_moves = []
@@ -77,12 +80,11 @@ class Tabuleiro(pygame.sprite.Sprite):
 
     def can_move(self, peca, to_linha, to_coluna):
 
-        target_place = self.get_piece(to_linha, to_linha)
+        target_place = self.get_piece(to_linha, to_coluna)
 
         if peca.name == 'king':
-            if target_place:
-                if target_place.colour == peca.colour:
-                    return False
+            if target_place and target_place.colour == peca.colour:
+                return False
         elif peca.name == 'rook':
             if peca.linha != to_linha: #esta se movimentando entre linhas
                 for i in range(min(peca.linha, to_linha), max(peca.linha, to_linha)+1):
@@ -210,7 +212,7 @@ class Tabuleiro(pygame.sprite.Sprite):
                     for i in range(min(peca.linha, to_linha), max(peca.linha, to_linha)+1):
                         if peca.linha != i and self.get_piece(i, peca.coluna): #Verifica se nao estah na mesma casa da peca
                             if (i, peca.coluna) == (to_linha, to_coluna): #na casa de destino o teste eh mais estrito
-                                if target_place.colour == peca.colour:
+                                if target_place and target_place.colour == peca.colour:
                                     return False
                             else:
                                 return False
@@ -218,22 +220,20 @@ class Tabuleiro(pygame.sprite.Sprite):
                     for i in range(min(peca.coluna, to_coluna), max(peca.coluna, to_coluna)+1):
                         if peca.coluna != i and self.get_piece(peca.linha, i):
                             if (peca.linha, i) == (to_linha, to_coluna): #na casa de destino o teste eh mais estrito
-                                if target_place.colour == peca.colour:
+                                if target_place and target_place.colour == peca.colour:
                                     return False
                             else:
                                 return False
                 else:
                     return False
 
-
-
         return True
 
     def move(self, linha, coluna):
         pos_destino = self.get_piece(linha,coluna)
 
-        self.place_piece(self.piece_selected, linha, coluna)
         self.remove_piece(self.piece_selected.linha, self.piece_selected.coluna)
+        self.place_piece(self.piece_selected, linha, coluna)
 
         if pos_destino:
             if pos_destino.colour == 'white':
@@ -242,7 +242,7 @@ class Tabuleiro(pygame.sprite.Sprite):
                 self.black_player.capturar_peca(pos_destino)
 
         self.change_turn()
-
+        #print(self.get_piece(linha, coluna).name)
         self.piece_selected = None
         self.possible_moves = []
         
@@ -272,6 +272,7 @@ class Tabuleiro(pygame.sprite.Sprite):
                     self.set_possible_moves(linha, coluna)
 
         print(str(linha), str(coluna))
+        #print(self.get_piece(linha, coluna).name)
 
 
     def draw(self, surface):
@@ -286,8 +287,6 @@ class Tabuleiro(pygame.sprite.Sprite):
             for pm in self.possible_moves:
                 if((self.position[i][1]//tile_length, self.position[i][0]//tile_length) == (pm[0], pm[1])):
                     pygame.draw.circle(surface, pygame.Color(0,0,0,220), (self.position[i][0]+tile_length/2, self.position[i][1]+tile_length/2), tile_length/4)
-        
-        self.pecas_tabuleiro = self.reseta_tabuleiro()
 
         for i in range(8):
             for j in range(8):
@@ -304,7 +303,7 @@ class Tabuleiro(pygame.sprite.Sprite):
 
         FPS = 60
         framesPerSecond = pygame.time.Clock()
-
+        self.pecas_tabuleiro = self.reseta_tabuleiro()
         while running:
             for event in pygame.event.get():
                 if event.type == QUIT:
