@@ -3,9 +3,9 @@ import sys
 import pecas
 from pygame.locals import *
 import time
+from Player import Player
 
 tile_length = 128
-
 
 class Tabuleiro(pygame.sprite.Sprite):
     def __init__(self, display):
@@ -20,11 +20,16 @@ class Tabuleiro(pygame.sprite.Sprite):
         self.position = [(x*tile_length, y*tile_length)
                          for x in range(8) for y in range(8)]
         self.pecas_tabuleiro = []
-        self.player1 = 'white'
-        self.player2 = 'black'
+        self.white_player = Player('white', True)
+        self.black_player = Player('black', False)
         
         self.piece_selected = None #guarda a peca atualmente selecionada
         self.possible_moves = [] #guarda os movimentos possiveis da peca atualmente selecionada
+        # self.turn = True #true -> white, false -> black
+
+    def change_turn(self):
+        self.white_player.passar_turno()
+        self.black_player.passar_turno()
 
     def reseta_tabuleiro(self):
         def gerar_pecas(cor):
@@ -63,7 +68,6 @@ class Tabuleiro(pygame.sprite.Sprite):
         peca = self.get_piece(linha, coluna)
 
         if peca:
-            #TODO desenhar opcoes de movimento
 
             self.piece_selected = peca
             
@@ -225,6 +229,51 @@ class Tabuleiro(pygame.sprite.Sprite):
 
         return True
 
+    def move(self, linha, coluna):
+        pos_destino = self.get_piece(linha,coluna)
+
+        self.place_piece(self.piece_selected, linha, coluna)
+        self.remove_piece(self.piece_selected.linha, self.piece_selected.coluna)
+
+        if pos_destino:
+            if pos_destino.colour == 'white':
+                self.white_player.capturar_peca(pos_destino)
+            else:
+                self.black_player.capturar_peca(pos_destino)
+
+        self.change_turn()
+
+        self.piece_selected = None
+        self.possible_moves = []
+        
+    #Recebe uma coordena referente ao clique do usuario na tela e decide a acao a ser tomada
+    def validate_click(self, x, y):
+        linha, coluna = (y//tile_length), (x//tile_length)
+
+        #Segundo clique
+        if self.piece_selected:
+            moved = False
+
+            for m in self.possible_moves:
+                if (linha, coluna) == (m[0], m[1]):
+                    self.move(m[0], m[1])
+                    moved = True
+
+            if not moved:
+                self.piece_selected = None
+                self.possible_moves = []
+
+        #Primeiro clique
+        else:
+            if self.get_piece(linha, coluna):
+                if self.get_piece(linha, coluna).colour == "black" and self.black_player.turn:
+                    self.set_possible_moves(linha, coluna)
+                elif self.get_piece(linha, coluna).colour == "white" and self.white_player.turn:
+                    self.set_possible_moves(linha, coluna)
+
+        print(str(linha), str(coluna))
+
+
     def draw(self, surface):
         colour_dict = {True: self.light_square, False: self.dark_square}
         current_colour = True
@@ -267,23 +316,10 @@ class Tabuleiro(pygame.sprite.Sprite):
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
                         x, y = event.pos  # sistema de coordenadas
-                        linha, coluna = (y//tile_length), (x//tile_length)
-                        print(str(linha))
-                        print(str(coluna))
-                        print()
-                        print(self.pecas_tabuleiro[linha][coluna].name)
-                        print(self.pecas_tabuleiro[linha]
-                              [coluna].get_movements())
-                        
-                        self.set_possible_moves(linha, coluna)
-                        # print(self.possible_moves)
-                        
-                        # for i in range(8):
-                        #     for j in range(8):
-                        #         print(i,j,self.can_move(self.pecas_tabuleiro[linha][coluna], i,j))
-                        # for button in self.buttons:
-                        #     if(button.buttonX < x and button.buttonX + button.buttonW > x and button.buttonY < y and button.buttonY + button.buttonH > y):
-                        #         button.click()
+
+                        self.validate_click(x,y)
+
+
 
             self.draw(self.surface)
             pygame.display.update()
