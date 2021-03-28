@@ -14,6 +14,12 @@ class Peca:
         self.image = pygame.image.load(
             "./sprites/128h/" + colour + "_" + name + ".png")
 
+    def __str__(self):
+        print("Nome: ", self.name)
+        print("Linha: ", self.linha)
+        print("Coluna: ", self.coluna)
+        print("Cor: ", self.colour)
+
     @abstractmethod
     def get_movements(self):
         pass
