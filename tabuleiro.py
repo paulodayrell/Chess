@@ -157,19 +157,19 @@ class Tabuleiro(pygame.sprite.Sprite):
                         return False
                 else:
                     return False
-
-            if peca.colour == "black":
-                if self.get_piece(to_linha, to_coluna) and self.get_piece(to_linha, to_coluna).colour == peca.colour:
-                    return False
-                if difference_linha > 1:
-                    if self.get_piece(peca.linha+1, to_coluna):
-                        return False
             else:
-                if self.get_piece(to_linha, to_coluna) and self.get_piece(to_linha, to_coluna).colour == peca.colour:
-                    return False
-                if difference_linha < -1:
-                    if self.get_piece(peca.linha-1, to_coluna):
+                if peca.colour == "black":
+                    if self.get_piece(to_linha, to_coluna):
                         return False
+                    if difference_linha > 1:
+                        if self.get_piece(peca.linha+1, to_coluna):
+                            return False
+                else:
+                    if self.get_piece(to_linha, to_coluna):
+                        return False
+                    if difference_linha < -1:
+                        if self.get_piece(peca.linha-1, to_coluna):
+                            return False
 
         elif peca.name == 'queen':
 
@@ -240,7 +240,8 @@ class Tabuleiro(pygame.sprite.Sprite):
                 self.white_player.capturar_peca(pos_destino)
             else:
                 self.black_player.capturar_peca(pos_destino)
-
+        self.piece_selected.moves +=1
+        self.piece_selected.moved = True
         self.change_turn()
         #print(self.get_piece(linha, coluna).name)
         self.piece_selected = None

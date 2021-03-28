@@ -175,6 +175,8 @@ class Peao(Peca):
         direction = -1 if self.colour == 'white' else 1
 
         #TODO colocar diagonal
+        moveset.append([self.linha + direction, self.coluna + direction]) # ++ direita inferior
+        moveset.append([self.linha + direction, self.coluna - direction]) # ++ direita inferior
 
         if self.moves == 0:
             for i in range(1, 3):
