@@ -222,7 +222,7 @@ class Tabuleiro(pygame.sprite.Sprite):
             pygame.display.update()
             framesPerSecond.tick(FPS)
             
-            if multiplayer and self.jogador_atual == 'black':
+            if not multiplayer and self.jogador_atual == 'black':
                 aux_board = self.copy()
                 mv = minimax(aux_board, 2, float('-inf'), float('inf'), True, 'black')
                 self.make_move(mv[0])
