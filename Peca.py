@@ -28,7 +28,7 @@ class Peca:
     def copy(self):
         copy = type(self)(self.linha, self.coluna, self.colour, self.tile_length)
         copy.captured = self.captured
-        self.moves = self.moves
+        copy.moves = self.moves
         copy.image = self.image
         return copy
 
