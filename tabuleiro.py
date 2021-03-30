@@ -30,6 +30,9 @@ class Tabuleiro(pygame.sprite.Sprite):
         self.jogador_atual = 'black' if self.jogador_atual =='white' else 'white'
         self.turnos += 1
 
+    def clear_board(self):
+        self.pecas_tabuleiro = [[None for x in range(8)] for x in range(8)]
+
     def reseta_tabuleiro(self):
         def gerar_pecas(cor):
             if cor == "black":
