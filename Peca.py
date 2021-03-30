@@ -77,23 +77,27 @@ class Peca:
         coluna = self.coluna
         while tabuleiro.pode_mover(self, linha, coluna):
             moveset.append([linha, coluna])
+            if tabuleiro.get_piece(linha, coluna): break
             linha -= 1
 
         linha = self.linha + 1
         while tabuleiro.pode_mover(self, linha, coluna):
             moveset.append([linha, coluna])
+            if tabuleiro.get_piece(linha, coluna): break
             linha += 1
 
         linha = self.linha
         coluna = self.coluna - 1
         while tabuleiro.pode_mover(self, linha, coluna):
             moveset.append([linha, coluna])
+            if tabuleiro.get_piece(linha, coluna): break
             coluna -= 1
 
         coluna = self.coluna + 1
         while tabuleiro.pode_mover(self, linha, coluna):
             moveset.append([linha, coluna])
-            coluna += coluna
+            if tabuleiro.get_piece(linha, coluna): break
+            coluna += 1
 
         return moveset
 
@@ -118,7 +122,9 @@ class Torre(Peca):
         super().__init__(linha, coluna, colour, 'rook', tile_length)
 
     def get_movements(self, tabuleiro):
-        return self.movimentos_cruz(tabuleiro)
+        moveset = self.movimentos_cruz(tabuleiro)
+        print(moveset)
+        return moveset
 
 class Bispo(Peca):
     def __init__(self, linha, coluna, colour, tile_length):
