@@ -24,6 +24,14 @@ class Peca:
     def get_movements(self):
         pass
 
+
+    def copy(self):
+        copy = type(self)(self.linha, self.coluna, self.colour, self.tile_length)
+        copy.captured = self.captured
+        self.moves = self.moves
+        copy.image = self.image
+        return copy
+
     def set_posicao(self, linha, coluna):
         self.linha = linha
         self.coluna = coluna
@@ -67,7 +75,7 @@ class Peca:
             coluna += 1
 
 
-        print(moveset)
+        #print(moveset)
         return moveset
 
     def movimentos_cruz(self, tabuleiro):
@@ -123,7 +131,7 @@ class Torre(Peca):
 
     def get_movements(self, tabuleiro):
         moveset = self.movimentos_cruz(tabuleiro)
-        print(moveset)
+        #print(moveset)
         return moveset
 
 class Bispo(Peca):
