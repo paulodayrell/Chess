@@ -538,3 +538,365 @@ class TestBasicMovementClass:
                 condition = False
 
         assert condition
+
+    def test_king_initial_movements(self):
+        tabuleiro = Tabuleiro(display)
+        tabuleiro.pecas_tabuleiro = tabuleiro.reseta_tabuleiro()
+
+        peace = tabuleiro.get_piece(0, 4)
+        
+        template_movements = [
+            [0, 3], [0, 5], [1, 3], [1, 4], [1, 5]
+        ]
+
+        # Definindo as posicoes que ela pode se movimentar
+        template_can_move = []
+        template_can_not_move = [
+            [0, 3], [0, 5], [1, 3], [1, 4], [1, 5]
+        ]
+
+        movements = peace.get_movements(tabuleiro)
+        
+        condition = True
+
+        for coordinate in template_can_move:
+            if [coordinate[0], coordinate[1]] not in movements:
+                condition = False
+        
+        for coordinate in template_can_not_move:
+            if [coordinate[0], coordinate[1]] in movements:
+                condition = False
+            
+        assert condition
+
+    def test_king_initial_movements_without_pawn(self):
+        tabuleiro = Tabuleiro(display)
+        tabuleiro.pecas_tabuleiro = tabuleiro.reseta_tabuleiro()
+        tabuleiro.pecas_tabuleiro[1] = [None for x in range(8)]
+
+        peace = tabuleiro.get_piece(0, 4)
+        
+        template_movements = [
+            [0, 3], [0, 5], [1, 3], [1, 4], [1, 5]
+        ]
+
+        # Definindo as posicoes que ela pode se movimentar
+        template_can_move = [
+            [1, 3], [1, 4], [1, 5]
+        ]
+        template_can_not_move = [
+            [0, 3], [0, 5]
+        ]
+        
+        movements = peace.get_movements(tabuleiro)
+
+        condition = True
+
+        for coordinate in template_can_move:
+            if [coordinate[0], coordinate[1]] not in movements:
+                condition = False
+        
+        for coordinate in template_can_not_move:
+            if [coordinate[0], coordinate[1]] in movements:
+                condition = False
+            
+        assert condition
+
+    def test_queen_initial_movements(self):
+        tabuleiro = Tabuleiro(display)
+        tabuleiro.pecas_tabuleiro = tabuleiro.reseta_tabuleiro()
+
+        peace = tabuleiro.get_piece(0, 3)
+        
+        template_movements = [
+            [0, 0], [0, 1], [0, 2], [0, 4], [0, 5], [0, 6], [0, 7], # Horizontal
+            [1, 3], [2, 3], [3, 3], [4, 3], [5, 3], [6, 3], [7, 3], # Vertical
+            [1, 2], [2, 1], [3, 0], # Diagonal Inferior Esquerda
+            [1, 4], [2, 5], [3, 6], [4, 7] # Diagonal Inferior Direita
+        ]
+
+        # Definindo as posicoes que ela pode se movimentar
+        template_can_move = []
+        template_can_not_move = [            
+            [0, 0], [0, 1], [0, 2], [0, 4], [0, 5], [0, 6], [0, 7], # Horizontal
+            [1, 3], [2, 3], [3, 3], [4, 3], [5, 3], [6, 3], [7, 3], # Vertical
+            [1, 2], [2, 1], [3, 0], # Diagonal Inferior Esquerda
+            [1, 4], [2, 5], [3, 6], [4, 7] # Diagonal Inferior Direita]
+        ]
+
+        movements = peace.get_movements(tabuleiro)
+        
+        condition = True
+
+        for coordinate in template_can_move:
+            if [coordinate[0], coordinate[1]] not in movements:
+                condition = False
+        
+        for coordinate in template_can_not_move:
+            if [coordinate[0], coordinate[1]] in movements:
+                condition = False
+            
+        assert condition
+
+    def test_queen_initial_movements_without_pawn(self):
+        tabuleiro = Tabuleiro(display)
+        tabuleiro.pecas_tabuleiro = tabuleiro.reseta_tabuleiro()
+        tabuleiro.pecas_tabuleiro[1] = [None for x in range(8)]
+
+        peace = tabuleiro.get_piece(0, 3)
+        
+        template_movements = [
+            [0, 0], [0, 1], [0, 2], [0, 4], [0, 5], [0, 6], [0, 7], # Horizontal
+            [1, 3], [2, 3], [3, 3], [4, 3], [5, 3], [6, 3], [7, 3], # Vertical
+            [1, 2], [2, 1], [3, 0], # Diagonal Inferior Esquerda
+            [1, 4], [2, 5], [3, 6], [4, 7] # Diagonal Inferior Direita
+        ]
+
+        # Definindo as posicoes que ela pode se movimentar
+        template_can_move = [
+            [1, 3], [2, 3], [3, 3], [4, 3], [5, 3], [6, 3], # Vertical
+            [1, 2], [2, 1], [3, 0], # Diagonal Inferior Esquerda
+            [1, 4], [2, 5], [3, 6], [4, 7] # Diagonal Inferior Direita]
+        ]
+        template_can_not_move = [            
+            [0, 0], [0, 1], [0, 2], [0, 4], [0, 5], [0, 6], [0, 7] # Horizontal
+        ]
+        
+        movements = peace.get_movements(tabuleiro)
+
+        condition = True
+
+        for coordinate in template_can_move:
+            if [coordinate[0], coordinate[1]] not in movements:
+                condition = False
+        
+        for coordinate in template_can_not_move:
+            if [coordinate[0], coordinate[1]] in movements:
+                condition = False
+            
+        assert condition
+
+    def test_rook_initial_movements(self):
+        tabuleiro = Tabuleiro(display)
+        tabuleiro.pecas_tabuleiro = tabuleiro.reseta_tabuleiro()
+
+        peace = tabuleiro.get_piece(0, 0)
+        
+        template_movements = [
+            [0, 1], [0, 2], [0, 3], [0, 4], [0, 5], [0, 6], [0, 7], # Horizontal
+            [1, 0], [2, 0], [3, 0], [4, 0], [5, 0], [6, 0], [7, 0], # Vertical
+        ]
+
+        # Definindo as posicoes que ela pode se movimentar
+        template_can_move = []
+        template_can_not_move = [            
+            [0, 1], [0, 2], [0, 3], [0, 4], [0, 5], [0, 6], [0, 7], # Horizontal
+            [1, 0], [2, 0], [3, 0], [4, 0], [5, 0], [6, 0], [7, 0], # Vertical
+        ]
+
+        movements = peace.get_movements(tabuleiro)
+        
+        condition = True
+
+        for coordinate in template_can_move:
+            if [coordinate[0], coordinate[1]] not in movements:
+                condition = False
+        
+        for coordinate in template_can_not_move:
+            if [coordinate[0], coordinate[1]] in movements:
+                condition = False
+            
+        assert condition
+
+    def test_rook_initial_movements_without_pawn(self):
+        tabuleiro = Tabuleiro(display)
+        tabuleiro.pecas_tabuleiro = tabuleiro.reseta_tabuleiro()
+        tabuleiro.pecas_tabuleiro[1] = [None for x in range(8)]
+
+        peace = tabuleiro.get_piece(0, 0)
+        
+        template_movements = [
+            [0, 1], [0, 2], [0, 3], [0, 4], [0, 5], [0, 6], [0, 7], # Horizontal
+            [1, 0], [2, 0], [3, 0], [4, 0], [5, 0], [6, 0], [7, 0], # Vertical
+        ]
+
+        # Definindo as posicoes que ela pode se movimentar
+        template_can_move = [
+            [1, 0], [2, 0], [3, 0], [4, 0], [5, 0], [6, 0] # Vertical
+        ]
+        template_can_not_move = [            
+            [0, 1], [0, 2], [0, 3], [0, 4], [0, 5], [0, 6], [0, 7], # Horizontal
+            [7, 0] # Vertical
+        ]
+        
+        movements = peace.get_movements(tabuleiro)
+
+        condition = True
+
+        for coordinate in template_can_move:
+            if [coordinate[0], coordinate[1]] not in movements:
+                condition = False
+        
+        for coordinate in template_can_not_move:
+            if [coordinate[0], coordinate[1]] in movements:
+                condition = False
+            
+        assert condition
+
+    def test_bishop_initial_movements(self):
+        tabuleiro = Tabuleiro(display)
+        tabuleiro.pecas_tabuleiro = tabuleiro.reseta_tabuleiro()
+
+        peace = tabuleiro.get_piece(0, 2)
+        
+        template_movements = [
+            [1, 1], [2, 0], # Diagonal Equerda Inferior
+            [1, 3], [2, 4], [3, 5], [4, 6], [5, 7] # Diagonal Direita Inferior
+        ]
+
+        # Definindo as posicoes que ela pode se movimentar
+        template_can_move = []
+        template_can_not_move = [            
+            [1, 1], [2, 0], # Diagonal Equerda Inferior
+            [1, 3], [2, 4], [3, 5], [4, 6], [5, 7] # Diagonal Direita Inferior
+        ]
+
+        movements = peace.get_movements(tabuleiro)
+        
+        condition = True
+
+        for coordinate in template_can_move:
+            if [coordinate[0], coordinate[1]] not in movements:
+                condition = False
+        
+        for coordinate in template_can_not_move:
+            if [coordinate[0], coordinate[1]] in movements:
+                condition = False
+            
+        assert condition
+
+    def test_bishop_initial_movements_without_pawn(self):
+        tabuleiro = Tabuleiro(display)
+        tabuleiro.pecas_tabuleiro = tabuleiro.reseta_tabuleiro()
+        tabuleiro.pecas_tabuleiro[1] = [None for x in range(8)]
+
+        peace = tabuleiro.get_piece(0, 2)
+        
+        template_movements = [
+            [1, 1], [2, 0], # Diagonal Equerda Inferior
+            [1, 3], [2, 4], [3, 5], [4, 6], [5, 7] # Diagonal Direita Inferior
+        ]
+
+        # Definindo as posicoes que ela pode se movimentar
+        template_can_move = [
+            [1, 1], [2, 0], # Diagonal Equerda Inferior
+            [1, 3], [2, 4], [3, 5], [4, 6], [5, 7] # Diagonal Direita Inferior
+        ]
+        template_can_not_move = []
+        
+        movements = peace.get_movements(tabuleiro)
+
+        condition = True
+
+        for coordinate in template_can_move:
+            if [coordinate[0], coordinate[1]] not in movements:
+                condition = False
+        
+        for coordinate in template_can_not_move:
+            if [coordinate[0], coordinate[1]] in movements:
+                condition = False
+            
+        assert condition
+
+    def test_knight_initial_movements(self):
+        tabuleiro = Tabuleiro(display)
+        tabuleiro.pecas_tabuleiro = tabuleiro.reseta_tabuleiro()
+
+        peace = tabuleiro.get_piece(0, 1)
+        
+        template_movements = [
+           [2, 0], [2, 2], [1, 3]
+        ]
+
+        # Definindo as posicoes que ela pode se movimentar
+        template_can_move = [
+            [2, 0], [2, 2]
+        ]
+        template_can_not_move = [
+            [1, 3]
+        ]
+
+        movements = peace.get_movements(tabuleiro)
+        
+        condition = True
+
+        for coordinate in template_can_move:
+            if [coordinate[0], coordinate[1]] not in movements:
+                condition = False
+        
+        for coordinate in template_can_not_move:
+            if [coordinate[0], coordinate[1]] in movements:
+                condition = False
+            
+        assert condition
+
+    def test_knight_initial_movements_without_pawn(self):
+        tabuleiro = Tabuleiro(display)
+        tabuleiro.pecas_tabuleiro = tabuleiro.reseta_tabuleiro()
+        tabuleiro.pecas_tabuleiro[1] = [None for x in range(8)]
+
+        peace = tabuleiro.get_piece(0, 1)
+        
+        template_movements = [
+           [2, 0], [2, 2], [1, 3]
+        ]
+
+        # Definindo as posicoes que ela pode se movimentar
+        template_can_move = [
+            [2, 0], [2, 2], [1, 3]
+        ]
+        template_can_not_move = []
+        
+        movements = peace.get_movements(tabuleiro)
+
+        condition = True
+
+        for coordinate in template_can_move:
+            if [coordinate[0], coordinate[1]] not in movements:
+                condition = False
+        
+        for coordinate in template_can_not_move:
+            if [coordinate[0], coordinate[1]] in movements:
+                condition = False
+            
+        assert condition
+
+    def test_pawn_initial_movements(self):
+        tabuleiro = Tabuleiro(display)
+        tabuleiro.pecas_tabuleiro = tabuleiro.reseta_tabuleiro()
+
+        peace = tabuleiro.get_piece(1, 1)
+
+        template_movements = [
+            [2, 1], [3, 1] # Vertical
+        ]
+
+        # Definindo as posicoes que ela pode se movimentar
+        template_can_move = [
+            [2, 1], [3, 1] # Vertical
+        ]
+        template_can_not_move = []
+
+        movements = peace.get_movements(tabuleiro)
+        
+        condition = True
+
+        for coordinate in template_can_move:
+            if [coordinate[0], coordinate[1]] not in movements:
+                condition = False
+        
+        for coordinate in template_can_not_move:
+            if [coordinate[0], coordinate[1]] in movements:
+                condition = False
+            
+        assert condition
