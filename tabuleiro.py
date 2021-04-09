@@ -39,6 +39,9 @@ class Tabuleiro(pygame.sprite.Sprite):
             print("get_out_of_check_moves", self.get_out_of_check_moves)
         else:
             self.current_player_check = False
+    
+    def clear_board(self):
+        self.pecas_tabuleiro = [[None for x in range(8)] for x in range(8)]
 
     def reseta_tabuleiro(self):
         def gerar_pecas(cor):
