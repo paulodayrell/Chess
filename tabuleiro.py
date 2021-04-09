@@ -18,18 +18,28 @@ class Tabuleiro(pygame.sprite.Sprite):
         self.position = [(x*tile_length, y*tile_length)
                          for x in range(8) for y in range(8)]
 
+        self.get_out_of_check_moves = []
+        self.current_player_check = False
         self.pecas_tabuleiro = []
         self.pecas_capturadas = []
         self.jogador_atual = 'white'
         self.turnos = 0
         self.piece_selected = None #guarda a peca atualmente selecionada
         self.possible_moves = [] #guarda os movimentos possiveis da peca atualmente selecionada
-        # self.turn = True #true -> white, false -> black
 
     def troca_turno(self):
         self.jogador_atual = 'black' if self.jogador_atual =='white' else 'white'
         self.turnos += 1
 
+        self.get_out_of_check_moves = []
+
+        if self.is_in_check():
+            self.current_player_check = True
+            print("Check mate", self.check_mate())
+            print("get_out_of_check_moves", self.get_out_of_check_moves)
+        else:
+            self.current_player_check = False
+    
     def clear_board(self):
         self.pecas_tabuleiro = [[None for x in range(8)] for x in range(8)]
 
@@ -90,7 +100,7 @@ class Tabuleiro(pygame.sprite.Sprite):
         self.troca_turno()
         self.piece_selected = None
         self.possible_moves = []
-    
+
     #Recebe uma coordena referente ao clique do usuario na tela e decide a acao a ser tomada
     def validate_click(self, x, y):
         linha, coluna = (y//tile_length), (x//tile_length)
@@ -98,14 +108,97 @@ class Tabuleiro(pygame.sprite.Sprite):
         #Se eu já tiver uma peça selecionada, preciso mover ela
         if self.piece_selected:
             if [linha, coluna] in self.possible_moves:
-                self.move(linha, coluna)
+                peca_capturada = self.move(linha, coluna)
                 self.piece_selected = None
         #Caso eu não tenha uma peça selecionada ou eu não tenha clicado em um movimento possivel, vou trocar de pedra
         peca_origem = self.get_piece(linha, coluna)
         if peca_origem:
             if peca_origem.colour == self.jogador_atual:
                 self.piece_selected = peca_origem
-                self.possible_moves = self.piece_selected.get_movements(self)
+                self.possible_moves = []
+
+                if self.current_player_check:
+                    for move in self.piece_selected.get_movements(self):
+                        for get_out_move in self.get_out_of_check_moves:
+                            if (get_out_move[0].linha, get_out_move[0].coluna) == (self.piece_selected.linha, self.piece_selected.coluna):
+                                if (move[0], move[1]) == (get_out_move[1], get_out_move[2]): #se ele eh um movimento que tira a peca de xeque
+                                    self.possible_moves.append(move)
+                else:
+                    for move in self.piece_selected.get_movements(self):
+                        if self.get_out_of_check(self.piece_selected, move[0], move[1]):
+                            self.possible_moves.append(move)            
+
+    def get_all_movements(self, player):
+        movements = set()
+
+        for linha in range(8):
+            for coluna in range(8):
+                peca = self.get_piece(linha,coluna)
+
+                if peca and peca.colour == player:
+                    posicoes = peca.get_movements(self)
+
+                    for posicao in posicoes:
+                        movements.add(tuple(posicao))
+
+        return movements
+
+    def is_in_check(self):
+
+        opponent = "black" if self.jogador_atual == "white" else "white"
+
+        movements = self.get_all_movements(opponent)
+
+        rei = None
+
+        for linha in range(8):
+            for coluna in range(8):
+                peca = self.get_piece(linha,coluna)
+
+                if peca and peca.name == "king" and peca.colour == self.jogador_atual:
+                    rei = peca
+
+        return (rei.linha, rei.coluna) in movements
+
+    def get_out_of_check(self, peca, to_linha, to_coluna):
+        from_linha = peca.linha
+        from_coluna = peca.coluna
+
+        #faz um movimento fake
+        peca.moves += 1
+        self.remove_piece(peca.linha, peca.coluna)
+        peca_destino = self.get_piece(to_linha, to_coluna)
+        self.place_piece(peca, to_linha, to_coluna)
+
+        #is_in_check
+        is_in_check = self.is_in_check()
+
+        #desfaz movimento fake
+        peca.moves -= 1
+        self.remove_piece(peca.linha, peca.coluna)
+        self.place_piece(peca, from_linha, from_coluna)
+        if peca_destino:
+            self.place_piece(peca_destino, to_linha, to_coluna)
+
+        return not is_in_check
+
+    def check_mate(self):
+
+        for linha in range(8):
+            for coluna in range(8):
+                peca = self.get_piece(linha,coluna)
+
+                if peca and peca.colour == self.jogador_atual:
+                    posicoes = peca.get_movements(self)
+
+                    for posicao in posicoes:
+                        if self.get_out_of_check(peca, posicao[0], posicao[1]):
+                            self.get_out_of_check_moves.append((peca, posicao[0], posicao[1]))
+
+        if len(self.get_out_of_check_moves) == 0: #nao existem movimentos que tirem o jogador de xeque
+            return True
+
+        return False
 
     def draw(self, surface):
         colour_dict = {True: self.light_square, False: self.dark_square}
@@ -136,6 +229,7 @@ class Tabuleiro(pygame.sprite.Sprite):
         FPS = 60
         framesPerSecond = pygame.time.Clock()
         self.pecas_tabuleiro = self.reseta_tabuleiro()
+
         while running:
             for event in pygame.event.get():
                 if event.type == QUIT:
@@ -149,8 +243,6 @@ class Tabuleiro(pygame.sprite.Sprite):
                         x, y = event.pos  # sistema de coordenadas
 
                         self.validate_click(x,y)
-
-
 
             self.draw(self.surface)
             pygame.display.update()
