@@ -1,6 +1,7 @@
 import pygame, sys
 from pygame.locals import *
 from button import *
+from config import *
 
 class Menu():
     def __init__(self, display, board):
@@ -34,7 +35,6 @@ class Menu():
             button.drawButton()
             
     def loop(self):
-        FPS = 60
         framesPerSecond = pygame.time.Clock()
 
         while True:
@@ -44,8 +44,10 @@ class Menu():
                     sys.exit()
                 elif event.type == pygame.KEYDOWN:
                     if event.key == 49:
+                        self.board.reset() # Reseta o tabuleiro antes de iniciar um novo jogo
                         self.board.loop()
                     elif event.key == 50:
+                        self.board.reset() # Reseta o tabuleiro antes de iniciar um novo jogo
                         self.board.loop()
                     elif event.key == 51:
                         pygame.quit()
@@ -63,6 +65,7 @@ class Menu():
             framesPerSecond.tick(FPS)
 
     def gotoBoardScreen(self):
+        self.board.reset() # Reseta o tabuleiro antes de iniciar um novo jogo
         self.board.loop()
 
     def exit(self):
