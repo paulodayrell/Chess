@@ -4,6 +4,7 @@ from pygame.locals import *
 import time
 from config import *
 from Peca import *
+from final_screen import *
 
 class Tabuleiro(pygame.sprite.Sprite):
     def __init__(self, display):
@@ -26,6 +27,27 @@ class Tabuleiro(pygame.sprite.Sprite):
         self.turnos = 0
         self.piece_selected = None #guarda a peca atualmente selecionada
         self.possible_moves = [] #guarda os movimentos possiveis da peca atualmente selecionada
+        self.screen_mode = "playing"
+
+    def reset(self):
+        self.dark_square = pygame.image.load(
+            "./sprites/128h/square brown dark.png")
+        self.light_square = pygame.image.load(
+            "./sprites/128h/square brown light.png")
+        self.surf = pygame.Surface((tile_length, tile_length))
+        self.rect = self.surf.get_rect()
+        self.position = [(x*tile_length, y*tile_length)
+                         for x in range(8) for y in range(8)]
+
+        self.get_out_of_check_moves = []
+        self.current_player_check = False
+        self.pecas_tabuleiro = []
+        self.pecas_capturadas = []
+        self.jogador_atual = 'white'
+        self.turnos = 0
+        self.piece_selected = None #guarda a peca atualmente selecionada
+        self.possible_moves = [] #guarda os movimentos possiveis da peca atualmente selecionada
+        self.screen_mode = "playing"
 
     def troca_turno(self):
         self.jogador_atual = 'black' if self.jogador_atual =='white' else 'white'
@@ -35,8 +57,13 @@ class Tabuleiro(pygame.sprite.Sprite):
 
         if self.is_in_check():
             self.current_player_check = True
-            print("Check mate", self.check_mate())
+            is_in_check_mate = self.check_mate()
+            print("Check mate", is_in_check_mate)
             print("get_out_of_check_moves", self.get_out_of_check_moves)
+
+            if is_in_check_mate:
+                self.screen_mode = "final_screen"
+                
         else:
             self.current_player_check = False
     
@@ -224,20 +251,17 @@ class Tabuleiro(pygame.sprite.Sprite):
                 surface.blit(img, self.position[j*8+i])
 
     def loop(self):
-        running = True
-
-        FPS = 60
         framesPerSecond = pygame.time.Clock()
         self.pecas_tabuleiro = self.reseta_tabuleiro()
 
-        while running:
+        while self.screen_mode == "playing":
             for event in pygame.event.get():
                 if event.type == QUIT:
                     pygame.quit()
                     sys.exit()
                 elif event.type == pygame.KEYDOWN:
                     if event.key == 27:  # 27 == "ESC"
-                        running = False
+                        self.screen_mode = "menu"
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:
                         x, y = event.pos  # sistema de coordenadas
@@ -247,3 +271,8 @@ class Tabuleiro(pygame.sprite.Sprite):
             self.draw(self.surface)
             pygame.display.update()
             framesPerSecond.tick(FPS)
+
+        if self.screen_mode == "final_screen":
+            FinalScreen(self.surface, self.jogador_atual, win = True).loop()
+
+        self.screen_mode = "playing"
