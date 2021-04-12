@@ -5,7 +5,7 @@ import time
 from config import *
 from Peca import *
 from minimax import *
-
+from move import Move
 class Tabuleiro(pygame.sprite.Sprite):
     def __init__(self, display):
         super().__init__()
@@ -116,32 +116,55 @@ class Tabuleiro(pygame.sprite.Sprite):
         copy.weights = self.weights
         
         return copy
-    
+
 
     def get_moves(self):
         moves = []
         for x in range(8):
             for y in range(8):
                 if self.pecas_tabuleiro[x][y] and self.pecas_tabuleiro[x][y].colour == self.jogador_atual:
-                    for move in self.pecas_tabuleiro[x][y].get_movements(self):
-                        if move: moves.append({(x,y): move})
+                    for movement in self.pecas_tabuleiro[x][y].get_movements(self):
+                        move = Move([x,y], movement, None)
+                        moves.append(move)
         return moves
 
     def make_move(self, move):
-        x, y = list(move.keys())[0]
-        piece = self.pecas_tabuleiro[x][y]
-        linha, coluna = list(move.values())[0]
-
+        self.move_ai(move, move.from_coord, move.to_coord)
+                
+    def undo_move(self, move):
+        self.move_ai(move, move.to_coord, move.from_coord)
+        self.uncapture(move.captured)
+            
+    def move_ai(self, move, from_coord, to_coord):
+        
+        x_to, y_to = to_coord
+        x_from, y_from = from_coord
+        
+        piece = self.get_piece(x_from, y_from)
+        if not piece:
+            return 
         self.remove_piece(piece.linha, piece.coluna)
         piece.moves +=1
 
-        pos_destino = self.get_piece(linha, coluna)
+        pos_destino = self.get_piece(x_to, y_to)
         if pos_destino:
             self.capturar_peca(pos_destino)
+            move.captured = pos_destino
         
-        self.place_piece(piece, linha, coluna)
-        self.troca_turno()
+        self.place_piece(piece, x_to, y_to)
 
+        self.troca_turno()
+        self.possible_moves = []
+    
+    def uncapture(self, piece):
+        if not piece: return
+        if  piece.colour == 'black':
+            self.black_score += self.weights[type(piece)]
+        else:
+            self.white_score += self.weights[type(piece)] 
+        self.pecas_capturadas.remove(piece) 
+        self.place_piece(piece, piece.linha, piece.coluna)        
+    
     def move(self, linha, coluna):
         self.remove_piece(self.piece_selected.linha, self.piece_selected.coluna)
         self.piece_selected.moves +=1
@@ -215,8 +238,6 @@ class Tabuleiro(pygame.sprite.Sprite):
 
                         
                         self.validate_click(x,y)
-
-
 
             self.draw(self.surface)
             pygame.display.update()

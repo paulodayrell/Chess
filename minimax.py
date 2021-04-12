@@ -14,32 +14,36 @@ def minimax(board, depth, alpha, beta, max_player, max_color):
   moves = board.get_moves()
   best_move = choice(moves)
 
-
   if max_player:
     max_eval = float('-inf')
     for move in sample(moves, len(moves)):
-      aux_board = board.copy()
       
       board.make_move(move)
       
       current_eval = minimax(board, depth -1, alpha, beta, False, max_color)[1]
-      board = aux_board
+
+      board.undo_move(move)
+      moves.remove(move)
       
       if current_eval > max_eval:
         max_eval = current_eval
         best_move = move
       alpha = max(alpha, current_eval)
-      if beta <= alpha: break
+      if beta <= alpha: break  
     return best_move, max_eval
+  
   else:
+    
     min_eval = float('inf')
+    
     for move in sample(moves, len(moves)):
-      aux_board = board.copy()
       
       board.make_move(move)
       
       current_eval = minimax(board, depth -1, alpha, beta, True, max_color)[1]
-      board = aux_board
+      
+      board.undo_move(move)      
+      moves.remove(move)
       
       if current_eval < min_eval:
         min_eval = current_eval
