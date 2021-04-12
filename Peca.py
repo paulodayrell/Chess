@@ -74,8 +74,6 @@ class Peca:
             linha += 1
             coluna += 1
 
-
-        #print(moveset)
         return moveset
 
     def movimentos_cruz(self, tabuleiro):
@@ -131,7 +129,6 @@ class Torre(Peca):
 
     def get_movements(self, tabuleiro):
         moveset = self.movimentos_cruz(tabuleiro)
-        #print(moveset)
         return moveset
 
 class Bispo(Peca):
