@@ -15,6 +15,7 @@ class Menu():
             Button( self.surface, 'Multijogador', self.gotoBoardScreen, True, (190, 190, 190), self.surface.get_width() / 2 - (self.buttonSize["w"] / 2), self.surface.get_height() / 2 - (self.buttonSize["h"] / 2), self.buttonSize["w"], self.buttonSize["h"]),
             Button( self.surface, 'Sair', self.exit, None, (190, 190, 190), self.surface.get_width() / 2 - (self.buttonSize["w"] / 2), self.surface.get_height() / 2 - (self.buttonSize["h"] / 2) + (2 * self.buttonSize["h"]), self.buttonSize["w"], self.buttonSize["h"])
         ]
+
         self.board = board
 
     def draw(self, surface):
@@ -64,9 +65,9 @@ class Menu():
             pygame.display.update()
             framesPerSecond.tick(FPS)
 
-    def gotoBoardScreen(self):
+    def gotoBoardScreen(self, multiplayer):
         self.board.reset() # Reseta o tabuleiro antes de iniciar um novo jogo
-        self.board.loop()
+        self.board.loop(multiplayer)
 
     def exit(self):
         pygame.quit()

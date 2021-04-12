@@ -277,7 +277,7 @@ class Tabuleiro(pygame.sprite.Sprite):
 
                 if peca and peca.name == "king" and peca.colour == self.jogador_atual:
                     rei = peca
-
+    
         return (rei.linha, rei.coluna) in movements
 
     def get_out_of_check(self, peca, to_linha, to_coluna):
@@ -343,7 +343,7 @@ class Tabuleiro(pygame.sprite.Sprite):
                                   True, (255, 255, 255))
                 surface.blit(img, self.position[j*8+i])
 
-    def loop(self):
+    def loop(self, multiplayer):
         framesPerSecond = pygame.time.Clock()
         self.pecas_tabuleiro = self.reseta_tabuleiro()
 
