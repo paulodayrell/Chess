@@ -15,14 +15,19 @@ class Peca:
         self.image = pygame.transform.scale(self.image, (tile_length, tile_length))
 
     def __str__(self):
-        print("Nome: ", self.name)
-        print("Linha: ", self.linha)
-        print("Coluna: ", self.coluna)
-        print("Cor: ", self.colour)
+        return "Nome: "+self.name+'\n'+"Linha: "+str(self.linha)+'\n'+"Coluna: "+str(self.coluna)+'\n'+"Cor: "+self.colour
 
     @abstractmethod
     def get_movements(self):
         pass
+
+
+    def copy(self):
+        copy = type(self)(self.linha, self.coluna, self.colour, self.tile_length)
+        copy.captured = self.captured
+        copy.moves = self.moves
+        copy.image = self.image
+        return copy
 
     def set_posicao(self, linha, coluna):
         self.linha = linha

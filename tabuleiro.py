@@ -4,6 +4,8 @@ from pygame.locals import *
 import time
 from config import *
 from Peca import *
+from minimax import *
+from move import Move
 from final_screen import *
 
 class Tabuleiro(pygame.sprite.Sprite):
@@ -27,6 +29,14 @@ class Tabuleiro(pygame.sprite.Sprite):
         self.turnos = 0
         self.piece_selected = None #guarda a peca atualmente selecionada
         self.possible_moves = [] #guarda os movimentos possiveis da peca atualmente selecionada
+        #self.turn = True #true -> white, false -> black
+
+        self.black_score = 1290
+        self.white_score = 1290
+        self.weights = {Rei: 900, Rainha: 90, Torre: 50, Bispo: 30, Cavalo: 30, Peao: 10}
+
+
+        self.moves = []
         self.screen_mode = "playing"
 
     def reset(self):
@@ -87,12 +97,18 @@ class Tabuleiro(pygame.sprite.Sprite):
                     for index, square in enumerate(board[1])]
         board[6] = [Peao(6, index, "white", tile_length)
                     for index, square in enumerate(board[6])]
+        
+        self.jogador_atual = 'white'
 
         return board
 
     def capturar_peca(self, peca):
+        if  peca.colour == 'black':
+            self.black_score -= self.weights[type(peca)]
+        else:
+            self.white_score -= self.weights[type(peca)] 
         self.pecas_capturadas.append(peca)
-
+    
     def get_piece(self, linha, coluna):
         return self.pecas_tabuleiro[linha][coluna]
 
@@ -113,6 +129,84 @@ class Tabuleiro(pygame.sprite.Sprite):
         if not self.posicao_valida(linha, coluna): return False
         pos_destino = self.get_piece(linha, coluna)
         return not pos_destino or pos_destino.colour!=peca.colour
+
+    
+    def copy(self):
+        copy = Tabuleiro(self.surface)
+        copy.position = self.position
+        copy.pecas_tabuleiro = []
+
+        for i in range(8):
+            aux = []
+            for j in range(8):
+                p = self.pecas_tabuleiro[i][j]
+                if p: aux.append(p.copy())
+                else: aux.append(None)
+            copy.pecas_tabuleiro.append(aux)
+
+        copy.pecas_capturadas = []
+
+        copy.pecas_capturadas = [p.copy() for p in self.pecas_capturadas]
+
+        copy.jogador_atual = self.jogador_atual
+        copy.turnos = self.turnos
+        copy.piece_selected = self.piece_selected
+        # copy.possible_moves = self.possible_moves
+        copy.possible_moves = [p.copy() for p in self.possible_moves]
+
+        copy.black_score = self.black_score
+        copy.white_score = self.white_score
+        copy.weights = self.weights
+        
+        return copy
+
+
+    def get_moves(self):
+        moves = []
+        for x in range(8):
+            for y in range(8):
+                if self.pecas_tabuleiro[x][y] and self.pecas_tabuleiro[x][y].colour == self.jogador_atual:
+                    for movement in self.pecas_tabuleiro[x][y].get_movements(self):
+                        move = Move([x,y], movement, None)
+                        moves.append(move)
+        return moves
+
+    def make_move(self, move):
+        self.move_ai(move, move.from_coord, move.to_coord)
+                
+    def undo_move(self, move):
+        self.move_ai(move, move.to_coord, move.from_coord)
+        self.uncapture(move.captured)
+            
+    def move_ai(self, move, from_coord, to_coord):
+        
+        x_to, y_to = to_coord
+        x_from, y_from = from_coord
+        
+        piece = self.get_piece(x_from, y_from)
+        if not piece:
+            return 
+        self.remove_piece(piece.linha, piece.coluna)
+        piece.moves +=1
+
+        pos_destino = self.get_piece(x_to, y_to)
+        if pos_destino:
+            self.capturar_peca(pos_destino)
+            move.captured = pos_destino
+        
+        self.place_piece(piece, x_to, y_to)
+
+        # self.troca_turno()
+        self.possible_moves = []
+    
+    def uncapture(self, piece):
+        if not piece: return
+        if  piece.colour == 'black':
+            self.black_score += self.weights[type(piece)]
+        else:
+            self.white_score += self.weights[type(piece)] 
+        self.pecas_capturadas.remove(piece) 
+        self.place_piece(piece, piece.linha, piece.coluna)        
     
     def move(self, linha, coluna):
         self.remove_piece(self.piece_selected.linha, self.piece_selected.coluna)
@@ -121,7 +215,7 @@ class Tabuleiro(pygame.sprite.Sprite):
         pos_destino = self.get_piece(linha,coluna)
         if pos_destino:
             self.capturar_peca(pos_destino)
-
+        
         self.place_piece(self.piece_selected, linha, coluna)
 
         self.troca_turno()
@@ -178,13 +272,15 @@ class Tabuleiro(pygame.sprite.Sprite):
 
         rei = None
 
+        # print("==================")
         for linha in range(8):
             for coluna in range(8):
                 peca = self.get_piece(linha,coluna)
-
+                # if peca and peca.name == "king":
+                    # print(peca)
                 if peca and peca.name == "king" and peca.colour == self.jogador_atual:
                     rei = peca
-
+    
         return (rei.linha, rei.coluna) in movements
 
     def get_out_of_check(self, peca, to_linha, to_coluna):
@@ -250,7 +346,7 @@ class Tabuleiro(pygame.sprite.Sprite):
                                   True, (255, 255, 255))
                 surface.blit(img, self.position[j*8+i])
 
-    def loop(self):
+    def loop(self, multiplayer):
         framesPerSecond = pygame.time.Clock()
         self.pecas_tabuleiro = self.reseta_tabuleiro()
 
@@ -266,11 +362,18 @@ class Tabuleiro(pygame.sprite.Sprite):
                     if event.button == 1:
                         x, y = event.pos  # sistema de coordenadas
 
+                        
                         self.validate_click(x,y)
 
             self.draw(self.surface)
             pygame.display.update()
             framesPerSecond.tick(FPS)
+            
+            if not multiplayer and self.jogador_atual == 'black':
+                aux_board = self.copy()
+                mv = minimax(aux_board, 2, float('-inf'), float('inf'), True, 'black')
+                self.make_move(mv[0])
+                self.troca_turno()
 
         if self.screen_mode == "final_screen":
             FinalScreen(self.surface, self.jogador_atual, win = True).loop()
