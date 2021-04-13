@@ -195,7 +195,7 @@ class Tabuleiro(pygame.sprite.Sprite):
         
         self.place_piece(piece, x_to, y_to)
 
-        self.troca_turno()
+        # self.troca_turno()
         self.possible_moves = []
     
     def uncapture(self, piece):
@@ -271,10 +271,12 @@ class Tabuleiro(pygame.sprite.Sprite):
 
         rei = None
 
+        # print("==================")
         for linha in range(8):
             for coluna in range(8):
                 peca = self.get_piece(linha,coluna)
-
+                # if peca and peca.name == "king":
+                    # print(peca)
                 if peca and peca.name == "king" and peca.colour == self.jogador_atual:
                     rei = peca
     
@@ -370,6 +372,7 @@ class Tabuleiro(pygame.sprite.Sprite):
                 aux_board = self.copy()
                 mv = minimax(aux_board, 2, float('-inf'), float('inf'), True, 'black')
                 self.make_move(mv[0])
+                self.troca_turno()
 
         if self.screen_mode == "final_screen":
             FinalScreen(self.surface, self.jogador_atual, win = True).loop()
