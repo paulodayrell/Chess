@@ -151,7 +151,8 @@ class Tabuleiro(pygame.sprite.Sprite):
         copy.jogador_atual = self.jogador_atual
         copy.turnos = self.turnos
         copy.piece_selected = self.piece_selected
-        copy.possible_moves = self.possible_moves
+        # copy.possible_moves = self.possible_moves
+        copy.possible_moves = [p.copy() for p in self.possible_moves]
 
         copy.black_score = self.black_score
         copy.white_score = self.white_score
