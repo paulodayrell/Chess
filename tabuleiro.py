@@ -65,6 +65,10 @@ class Tabuleiro(pygame.sprite.Sprite):
 
         self.get_out_of_check_moves = []
 
+        if self.dead_position():
+            print("dead_position")
+            self.screen_mode = "draw_dead_position"
+
         if self.is_in_check():
             self.current_player_check = True
             is_in_check_mate = self.check_mate()
@@ -93,10 +97,10 @@ class Tabuleiro(pygame.sprite.Sprite):
 
         board[0] = gerar_pecas("black")
         board[7] = gerar_pecas("white")
-        board[1] = [Peao(1, index, "black", tile_length)
-                    for index, square in enumerate(board[1])]
-        board[6] = [Peao(6, index, "white", tile_length)
-                    for index, square in enumerate(board[6])]
+        # board[1] = [Peao(1, index, "black", tile_length)
+        #             for index, square in enumerate(board[1])]
+        # board[6] = [Peao(6, index, "white", tile_length)
+        #             for index, square in enumerate(board[6])]
         
         self.jogador_atual = 'white'
 
@@ -108,7 +112,7 @@ class Tabuleiro(pygame.sprite.Sprite):
         else:
             self.white_score -= self.weights[type(peca)] 
         self.pecas_capturadas.append(peca)
-    
+
     def get_piece(self, linha, coluna):
         return self.pecas_tabuleiro[linha][coluna]
 
@@ -323,6 +327,83 @@ class Tabuleiro(pygame.sprite.Sprite):
 
         return False
 
+    def dead_position(self):
+
+        pecas_brancas = {'rook':2, 'knight':2, 'bishop':2, 'queen':1, 'king':1, 'pawn':8}
+        pecas_pretas = {'rook':2, 'knight':2, 'bishop':2, 'queen':1, 'king':1, 'pawn':8}
+        black_draw = False
+        white_draw = False
+
+        for peca in self.pecas_capturadas:
+            if(peca.colour == 'white'):
+                pecas_brancas[peca.name] -= 1
+            else:
+                pecas_pretas[peca.name] -= 1
+
+        lone_king_white = True
+        king_bishop_white = True
+        king_knight_white = True
+
+        if pecas_brancas['bishop'] != 1:
+            king_bishop_white = False
+
+        if pecas_brancas['knight'] != 1:
+            king_knight_white = False
+
+        for peca in pecas_brancas:
+            if(peca != 'king' and pecas_brancas[peca] != 0):
+                lone_king_white = False
+        
+                if(peca != 'bishop'):
+                    king_bishop_white = False
+                    
+                if(peca != 'knight'):
+                    king_knight_white = False
+
+        lone_king_black = True
+        king_bishop_black = True
+        king_knight_black = True
+
+        if pecas_pretas['bishop'] != 1:
+            king_bishop_black = False
+
+        if pecas_pretas['knight'] != 1:
+            king_knight_black = False
+
+        for peca in pecas_pretas:
+            if(peca != 'king' and pecas_pretas[peca] != 0):
+                lone_king_black = False
+
+                if(peca != 'bishop'):
+                    king_bishop_black = False
+                    
+                if(peca != 'knight'):
+                    king_knight_black = False
+
+        print("lone_king_white: "+str(lone_king_white))
+        print("king_bishop_white: "+str(king_bishop_white))
+        print("king_knight_white: "+str(king_knight_white))
+
+        print(pecas_brancas)
+
+        print()
+
+        print("lone_king_black: "+str(lone_king_black))
+        print("king_bishop_black: "+str(king_bishop_black))
+        print("king_knight_black: "+str(king_knight_black))
+
+        print(pecas_pretas)
+
+        print()
+
+        if lone_king_white or king_bishop_white or king_knight_white:
+            white_draw = True
+
+        if lone_king_black or king_bishop_black or king_knight_black:
+            black_draw = True
+
+        return black_draw and white_draw
+
     def draw(self, surface):
         colour_dict = {True: self.light_square, False: self.dark_square}
         current_colour = True
@@ -377,5 +458,7 @@ class Tabuleiro(pygame.sprite.Sprite):
 
         if self.screen_mode == "final_screen":
             FinalScreen(self.surface, self.jogador_atual, win = True).loop()
+        elif self.screen_mode == "draw_dead_position":
+            FinalScreen(self.surface, self.jogador_atual, win = False).loop()
 
         self.screen_mode = "playing"
