@@ -82,7 +82,7 @@ class Tabuleiro(pygame.sprite.Sprite):
 
             if self.stalemate():
                 self.screen_mode = "draw_stalemate"
-    
+
     def clear_board(self):
         self.pecas_tabuleiro = [[None for x in range(8)] for x in range(8)]
 
@@ -216,6 +216,8 @@ class Tabuleiro(pygame.sprite.Sprite):
         self.pecas_capturadas.remove(piece)
         self.place_piece(piece, piece.linha, piece.coluna)
 
+    def promocao_peao(self):
+
     def move(self, linha, coluna):
         self.remove_piece(self.piece_selected.linha,
                           self.piece_selected.coluna)
@@ -225,7 +227,7 @@ class Tabuleiro(pygame.sprite.Sprite):
         if pos_destino:
             self.capturar_peca(pos_destino)
 
-        # roque
+        # jogadaespecial roque
         if self.piece_selected.name == "king" and coluna == (self.piece_selected.coluna + 2):
             torre = self.get_piece(linha, self.piece_selected.coluna + 3)
             self.remove_piece(linha, self.piece_selected.coluna + 3)
@@ -237,8 +239,12 @@ class Tabuleiro(pygame.sprite.Sprite):
             self.place_piece(torre, linha, self.piece_selected.coluna - 1)
             torre.moves += 1
 
-        self.place_piece(self.piece_selected, linha, coluna)
+        # # jogadaespecial promocao de peao
+        if self.piece_selected.name == "pawn":
+            if (self.piece_selected.colour == "white" and linha == 0) or (self.piece_selected.colour == "black" and linha == 7):
+                self.piece_selected = promocao_peao()
 
+        self.place_piece(self.piece_selected, linha, coluna)
         self.troca_turno()
         self.piece_selected = None
         self.possible_moves = []
@@ -348,7 +354,7 @@ class Tabuleiro(pygame.sprite.Sprite):
         return False
 
     def stalemate(self):
-        #Se a funcao check_mate retorna true quando o jogador nao estah em xeque um stalemate aconteceu
+        # Se a funcao check_mate retorna true quando o jogador nao estah em xeque um stalemate aconteceu
         if self.check_mate():
             return True
         else:
@@ -407,8 +413,8 @@ class Tabuleiro(pygame.sprite.Sprite):
                 self.troca_turno()
 
         if self.screen_mode == "final_screen":
-            FinalScreen(self.surface, self.jogador_atual, win = True).loop()
+            FinalScreen(self.surface, self.jogador_atual, win=True).loop()
         if self.screen_mode == "draw_stalemate":
-            FinalScreen(self.surface, self.jogador_atual, win = False).loop()
+            FinalScreen(self.surface, self.jogador_atual, win=False).loop()
 
         self.screen_mode = "playing"
