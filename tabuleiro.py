@@ -74,8 +74,6 @@ class Tabuleiro(pygame.sprite.Sprite):
 
         self.get_out_of_check_moves = []
 
-        print(self.fifty_moves)
-
         if self.fifty_moves >= 50:
             self.screen_mode = "draw_fifty_moves"
 
@@ -93,6 +91,8 @@ class Tabuleiro(pygame.sprite.Sprite):
                 
         else:
             self.current_player_check = False
+            if self.stalemate():
+                self.screen_mode = "draw_stalemate"
     
     def clear_board(self):
         self.pecas_tabuleiro = [[None for x in range(8)] for x in range(8)]
@@ -395,22 +395,6 @@ class Tabuleiro(pygame.sprite.Sprite):
                 if(peca != 'knight'):
                     king_knight_black = False
 
-        # print("lone_king_white: "+str(lone_king_white))
-        # print("king_bishop_white: "+str(king_bishop_white))
-        # print("king_knight_white: "+str(king_knight_white))
-
-        # print(pecas_brancas)
-
-        # print()
-
-        # print("lone_king_black: "+str(lone_king_black))
-        # print("king_bishop_black: "+str(king_bishop_black))
-        # print("king_knight_black: "+str(king_knight_black))
-
-        # print(pecas_pretas)
-
-        # print()
-
         if lone_king_white or king_bishop_white or king_knight_white:
             white_draw = True
 
@@ -418,6 +402,13 @@ class Tabuleiro(pygame.sprite.Sprite):
             black_draw = True
 
         return black_draw and white_draw
+        
+    def stalemate(self):
+        #Se a funcao check_mate retorna true quando o jogador nao estah em xeque um stalemate aconteceu
+        if self.check_mate():
+            return True
+        else:
+            return False
 
     def draw(self, surface):
         colour_dict = {True: self.light_square, False: self.dark_square}
@@ -482,6 +473,7 @@ class Tabuleiro(pygame.sprite.Sprite):
             FinalScreen(self.surface, self.jogador_atual, win = False).loop()
         elif self.screen_mode == "draw_fifty_moves":
             FinalScreen(self.surface, self.jogador_atual, win = False).loop()
-
+        elif self.screen_mode == "draw_stalemate":
+            FinalScreen(self.surface, self.jogador_atual, win = False).loop()
 
         self.screen_mode = "playing"
