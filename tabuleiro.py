@@ -24,6 +24,7 @@ class Tabuleiro(pygame.sprite.Sprite):
         self.get_out_of_check_moves = []
         self.current_player_check = False
         self.pecas_tabuleiro = []
+        self.pecas_capturadas_anterior = []
         self.pecas_capturadas = []
         self.jogador_atual = 'white'
         self.turnos = 0
@@ -57,6 +58,7 @@ class Tabuleiro(pygame.sprite.Sprite):
         self.pecas_capturadas = []
         self.jogador_atual = 'white'
         self.turnos = 0
+        self.fifty_moves = 0
         self.piece_selected = None #guarda a peca atualmente selecionada
         self.possible_moves = [] #guarda os movimentos possiveis da peca atualmente selecionada
         self.screen_mode = "playing"
