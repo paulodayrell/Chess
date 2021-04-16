@@ -35,6 +35,7 @@ class Tabuleiro(pygame.sprite.Sprite):
         self.white_score = 1290
         self.weights = {Rei: 900, Rainha: 90, Torre: 50, Bispo: 30, Cavalo: 30, Peao: 10}
 
+        self.fifty_moves = 0
 
         self.moves = []
         self.screen_mode = "playing"
@@ -52,6 +53,7 @@ class Tabuleiro(pygame.sprite.Sprite):
         self.get_out_of_check_moves = []
         self.current_player_check = False
         self.pecas_tabuleiro = []
+        self.pecas_capturadas_anterior = []
         self.pecas_capturadas = []
         self.jogador_atual = 'white'
         self.turnos = 0
@@ -63,10 +65,21 @@ class Tabuleiro(pygame.sprite.Sprite):
         self.jogador_atual = 'black' if self.jogador_atual =='white' else 'white'
         self.turnos += 1
 
+        if (len(self.pecas_capturadas_anterior) != len(self.pecas_capturadas)):
+            self.fifty_moves = 0
+
+        self.fifty_moves += 1
+
+        self.pecas_capturadas_anterior = self.pecas_capturadas.copy()
+
         self.get_out_of_check_moves = []
 
+        print(self.fifty_moves)
+
+        if self.fifty_moves >= 50:
+            self.screen_mode = "draw_fifty_moves"
+
         if self.dead_position():
-            print("dead_position")
             self.screen_mode = "draw_dead_position"
 
         if self.is_in_check():
@@ -97,10 +110,10 @@ class Tabuleiro(pygame.sprite.Sprite):
 
         board[0] = gerar_pecas("black")
         board[7] = gerar_pecas("white")
-        # board[1] = [Peao(1, index, "black", tile_length)
-        #             for index, square in enumerate(board[1])]
-        # board[6] = [Peao(6, index, "white", tile_length)
-        #             for index, square in enumerate(board[6])]
+        board[1] = [Peao(1, index, "black", tile_length)
+                    for index, square in enumerate(board[1])]
+        board[6] = [Peao(6, index, "white", tile_length)
+                    for index, square in enumerate(board[6])]
         
         self.jogador_atual = 'white'
 
@@ -233,7 +246,9 @@ class Tabuleiro(pygame.sprite.Sprite):
         #Se eu já tiver uma peça selecionada, preciso mover ela
         if self.piece_selected:
             if [linha, coluna] in self.possible_moves:
-                peca_capturada = self.move(linha, coluna)
+                if (self.piece_selected.name == 'pawn'):
+                    self.fifty_moves = 0
+                self.move(linha, coluna)
                 self.piece_selected = None
         #Caso eu não tenha uma peça selecionada ou eu não tenha clicado em um movimento possivel, vou trocar de pedra
         peca_origem = self.get_piece(linha, coluna)
@@ -380,21 +395,21 @@ class Tabuleiro(pygame.sprite.Sprite):
                 if(peca != 'knight'):
                     king_knight_black = False
 
-        print("lone_king_white: "+str(lone_king_white))
-        print("king_bishop_white: "+str(king_bishop_white))
-        print("king_knight_white: "+str(king_knight_white))
+        # print("lone_king_white: "+str(lone_king_white))
+        # print("king_bishop_white: "+str(king_bishop_white))
+        # print("king_knight_white: "+str(king_knight_white))
 
-        print(pecas_brancas)
+        # print(pecas_brancas)
 
-        print()
+        # print()
 
-        print("lone_king_black: "+str(lone_king_black))
-        print("king_bishop_black: "+str(king_bishop_black))
-        print("king_knight_black: "+str(king_knight_black))
+        # print("lone_king_black: "+str(lone_king_black))
+        # print("king_bishop_black: "+str(king_bishop_black))
+        # print("king_knight_black: "+str(king_knight_black))
 
-        print(pecas_pretas)
+        # print(pecas_pretas)
 
-        print()
+        # print()
 
         if lone_king_white or king_bishop_white or king_knight_white:
             white_draw = True
@@ -453,6 +468,11 @@ class Tabuleiro(pygame.sprite.Sprite):
             if not multiplayer and self.jogador_atual == 'black':
                 aux_board = self.copy()
                 mv = minimax(aux_board, 2, float('-inf'), float('inf'), True, 'black')
+                
+                piece = self.get_piece(mv[0].from_coord[0], mv[0].from_coord[0])
+                if piece and piece.name == 'pawn':
+                    self.fifty_moves = 0
+
                 self.make_move(mv[0])
                 self.troca_turno()
 
@@ -460,5 +480,8 @@ class Tabuleiro(pygame.sprite.Sprite):
             FinalScreen(self.surface, self.jogador_atual, win = True).loop()
         elif self.screen_mode == "draw_dead_position":
             FinalScreen(self.surface, self.jogador_atual, win = False).loop()
+        elif self.screen_mode == "draw_fifty_moves":
+            FinalScreen(self.surface, self.jogador_atual, win = False).loop()
+
 
         self.screen_mode = "playing"
