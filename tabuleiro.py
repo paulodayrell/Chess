@@ -80,6 +80,9 @@ class Tabuleiro(pygame.sprite.Sprite):
         else:
             self.current_player_check = False
 
+            if self.stalemate():
+                self.screen_mode = "draw_stalemate"
+    
     def clear_board(self):
         self.pecas_tabuleiro = [[None for x in range(8)] for x in range(8)]
 
@@ -344,6 +347,13 @@ class Tabuleiro(pygame.sprite.Sprite):
 
         return False
 
+    def stalemate(self):
+        #Se a funcao check_mate retorna true quando o jogador nao estah em xeque um stalemate aconteceu
+        if self.check_mate():
+            return True
+        else:
+            return False
+
     def draw(self, surface):
         colour_dict = {True: self.light_square, False: self.dark_square}
         current_colour = True
@@ -397,6 +407,8 @@ class Tabuleiro(pygame.sprite.Sprite):
                 self.troca_turno()
 
         if self.screen_mode == "final_screen":
-            FinalScreen(self.surface, self.jogador_atual, win=True).loop()
+            FinalScreen(self.surface, self.jogador_atual, win = True).loop()
+        if self.screen_mode == "draw_stalemate":
+            FinalScreen(self.surface, self.jogador_atual, win = False).loop()
 
         self.screen_mode = "playing"
