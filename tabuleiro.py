@@ -217,6 +217,18 @@ class Tabuleiro(pygame.sprite.Sprite):
         self.place_piece(piece, piece.linha, piece.coluna)
 
     def promocao_peao(self):
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_r:
+                        return Rainha(self.piece_selected.linha, self.piece_selected.coluna, self.piece_selected.colour, tile_length, self.piece_selected.moves)
+                    elif event.key == pygame.K_t:
+                        return Torre(self.piece_selected.linha, self.piece_selected.coluna, self.piece_selected.colour, tile_length, self.piece_selected.moves)
+                    elif event.key == pygame.K_b:
+                        return Bispo(self.piece_selected.linha, self.piece_selected.coluna, self.piece_selected.colour, tile_length, self.piece_selected.moves)
+                    elif event.key == pygame.K_c:
+                        return Cavalo(self.piece_selected.linha, self.piece_selected.coluna,
+                                      self.piece_selected.colour, tile_length, self.piece_selected.moves)
 
     def move(self, linha, coluna):
         self.remove_piece(self.piece_selected.linha,
@@ -242,7 +254,7 @@ class Tabuleiro(pygame.sprite.Sprite):
         # # jogadaespecial promocao de peao
         if self.piece_selected.name == "pawn":
             if (self.piece_selected.colour == "white" and linha == 0) or (self.piece_selected.colour == "black" and linha == 7):
-                self.piece_selected = promocao_peao()
+                self.piece_selected = self.promocao_peao()
 
         self.place_piece(self.piece_selected, linha, coluna)
         self.troca_turno()
