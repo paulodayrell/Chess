@@ -3,13 +3,13 @@ import pygame
 
 
 class Peca:
-    def __init__(self, linha, coluna, colour, name, tile_length, abc=ABCMeta):
+    def __init__(self, linha, coluna, colour, name, tile_length, moves, abc=ABCMeta):
         self.linha = linha
         self.coluna = coluna
         self.colour = colour
         self.name = name
         self.captured = False
-        self.moves = 0  # nao precisamos de moved pq é só verificar se moves >0
+        self.moves = moves
         self.image = pygame.image.load(
             "./sprites/128h/" + colour + "_" + name + ".png")
         self.tile_length = tile_length
@@ -116,10 +116,10 @@ class Peca:
 
 
 class Rei(Peca):
-    def __init__(self, linha, coluna, colour, tile_length):
+    def __init__(self, linha, coluna, colour, tile_length, moves=0):
         self.moveset = {(coluna, linha) for coluna in range(-1, 2)
                         for linha in range(-1, 2) if coluna != 0 or linha != 0}
-        super().__init__(linha, coluna, colour, 'king', tile_length)
+        super().__init__(linha, coluna, colour, 'king', tile_length, moves)
 
     def testeTorreParaRoque(self, tabuleiro, linha, coluna):
         p = tabuleiro.get_piece(linha, coluna)
@@ -151,8 +151,8 @@ class Rei(Peca):
 
 
 class Torre(Peca):
-    def __init__(self, linha, coluna, colour, tile_length):
-        super().__init__(linha, coluna, colour, 'rook', tile_length)
+    def __init__(self, linha, coluna, colour, tile_length, moves=0):
+        super().__init__(linha, coluna, colour, 'rook', tile_length, moves)
 
     def get_movements(self, tabuleiro):
         moveset = self.movimentos_cruz(tabuleiro)
@@ -160,16 +160,16 @@ class Torre(Peca):
 
 
 class Bispo(Peca):
-    def __init__(self, linha, coluna, colour, tile_length):
-        super().__init__(linha, coluna, colour, 'bishop', tile_length)
+    def __init__(self, linha, coluna, colour, tile_length, moves=0):
+        super().__init__(linha, coluna, colour, 'bishop', tile_length, moves)
 
     def get_movements(self, tabuleiro):
         return self.movimentos_diagonais(tabuleiro)
 
 
 class Cavalo(Peca):
-    def __init__(self, linha, coluna, colour, tile_length):
-        super().__init__(linha, coluna, colour, 'knight', tile_length)
+    def __init__(self, linha, coluna, colour, tile_length, moves=0):
+        super().__init__(linha, coluna, colour, 'knight', tile_length, moves)
 
     def get_movements(self, tabuleiro):
         moveset = [
@@ -187,8 +187,8 @@ class Cavalo(Peca):
 
 
 class Rainha(Peca):
-    def __init__(self, linha, coluna, colour, tile_length):
-        super().__init__(linha, coluna, colour, 'queen', tile_length)
+    def __init__(self, linha, coluna, colour, tile_length, moves=0):
+        super().__init__(linha, coluna, colour, 'queen', tile_length, moves)
 
     def get_movements(self, tabuleiro):
         moveset = self.movimentos_diagonais(tabuleiro)
@@ -198,10 +198,10 @@ class Rainha(Peca):
 
 
 class Peao(Peca):
-    def __init__(self, linha, coluna, colour, tile_length):
+    def __init__(self, linha, coluna, colour, tile_length, moves=0):
         self.direction = -1 if colour == 'white' else 1
         self.moveset = {(linha * self.direction, 0) for linha in range(1, 2)}
-        super().__init__(linha, coluna, colour, 'pawn', tile_length)
+        super().__init__(linha, coluna, colour, 'pawn', tile_length, moves)
 
     def get_movements(self, tabuleiro):
         moveset = []
