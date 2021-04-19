@@ -8,6 +8,7 @@ from minimax import *
 from move import Move
 from final_screen import *
 
+
 class Tabuleiro(pygame.sprite.Sprite):
     def __init__(self, display):
         super().__init__()
@@ -28,16 +29,15 @@ class Tabuleiro(pygame.sprite.Sprite):
         self.pecas_capturadas = []
         self.jogador_atual = 'white'
         self.turnos = 0
-        self.piece_selected = None #guarda a peca atualmente selecionada
-        self.possible_moves = [] #guarda os movimentos possiveis da peca atualmente selecionada
-        #self.turn = True #true -> white, false -> black
+        self.piece_selected = None  # guarda a peca atualmente selecionada
+        # guarda os movimentos possiveis da peca atualmente selecionada
+        self.possible_moves = []
+        # self.turn = True #true -> white, false -> black
 
         self.black_score = 1290
         self.white_score = 1290
         self.weights = {Rei: 900, Rainha: 90, Torre: 50, Bispo: 30, Cavalo: 30, Peao: 10}
-
         self.fifty_moves = 0
-
         self.moves = []
         self.screen_mode = "playing"
 
@@ -64,7 +64,7 @@ class Tabuleiro(pygame.sprite.Sprite):
         self.screen_mode = "playing"
 
     def troca_turno(self):
-        self.jogador_atual = 'black' if self.jogador_atual =='white' else 'white'
+        self.jogador_atual = 'black' if self.jogador_atual == 'white' else 'white'
         self.turnos += 1
 
         if (len(self.pecas_capturadas_anterior) != len(self.pecas_capturadas)):
@@ -90,12 +90,13 @@ class Tabuleiro(pygame.sprite.Sprite):
 
             if is_in_check_mate:
                 self.screen_mode = "final_screen"
-                
+
         else:
             self.current_player_check = False
+
             if self.stalemate():
                 self.screen_mode = "draw_stalemate"
-    
+
     def clear_board(self):
         self.pecas_tabuleiro = [[None for x in range(8)] for x in range(8)]
 
@@ -116,16 +117,16 @@ class Tabuleiro(pygame.sprite.Sprite):
                     for index, square in enumerate(board[1])]
         board[6] = [Peao(6, index, "white", tile_length)
                     for index, square in enumerate(board[6])]
-        
+
         self.jogador_atual = 'white'
 
         return board
 
     def capturar_peca(self, peca):
-        if  peca.colour == 'black':
+        if peca.colour == 'black':
             self.black_score -= self.weights[type(peca)]
         else:
-            self.white_score -= self.weights[type(peca)] 
+            self.white_score -= self.weights[type(peca)]
         self.pecas_capturadas.append(peca)
 
     def get_piece(self, linha, coluna):
@@ -145,11 +146,11 @@ class Tabuleiro(pygame.sprite.Sprite):
         return False
 
     def pode_mover(self, peca, linha, coluna):
-        if not self.posicao_valida(linha, coluna): return False
+        if not self.posicao_valida(linha, coluna):
+            return False
         pos_destino = self.get_piece(linha, coluna)
-        return not pos_destino or pos_destino.colour!=peca.colour
+        return not pos_destino or pos_destino.colour != peca.colour
 
-    
     def copy(self):
         copy = Tabuleiro(self.surface)
         copy.position = self.position
@@ -159,8 +160,10 @@ class Tabuleiro(pygame.sprite.Sprite):
             aux = []
             for j in range(8):
                 p = self.pecas_tabuleiro[i][j]
-                if p: aux.append(p.copy())
-                else: aux.append(None)
+                if p:
+                    aux.append(p.copy())
+                else:
+                    aux.append(None)
             copy.pecas_tabuleiro.append(aux)
 
         copy.pecas_capturadas = []
@@ -176,9 +179,8 @@ class Tabuleiro(pygame.sprite.Sprite):
         copy.black_score = self.black_score
         copy.white_score = self.white_score
         copy.weights = self.weights
-        
-        return copy
 
+        return copy
 
     def get_moves(self):
         moves = []
@@ -186,73 +188,105 @@ class Tabuleiro(pygame.sprite.Sprite):
             for y in range(8):
                 if self.pecas_tabuleiro[x][y] and self.pecas_tabuleiro[x][y].colour == self.jogador_atual:
                     for movement in self.pecas_tabuleiro[x][y].get_movements(self):
-                        move = Move([x,y], movement, None)
+                        move = Move([x, y], movement, None)
                         moves.append(move)
         return moves
 
     def make_move(self, move):
         self.move_ai(move, move.from_coord, move.to_coord)
-                
+
     def undo_move(self, move):
         self.move_ai(move, move.to_coord, move.from_coord)
         self.uncapture(move.captured)
-            
+
     def move_ai(self, move, from_coord, to_coord):
-        
+
         x_to, y_to = to_coord
         x_from, y_from = from_coord
-        
+
         piece = self.get_piece(x_from, y_from)
         if not piece:
-            return 
+            return
         self.remove_piece(piece.linha, piece.coluna)
-        piece.moves +=1
+        piece.moves += 1
 
         pos_destino = self.get_piece(x_to, y_to)
         if pos_destino:
             self.capturar_peca(pos_destino)
             move.captured = pos_destino
-        
+
         self.place_piece(piece, x_to, y_to)
 
         # self.troca_turno()
         self.possible_moves = []
-    
+
     def uncapture(self, piece):
-        if not piece: return
-        if  piece.colour == 'black':
+        if not piece:
+            return
+        if piece.colour == 'black':
             self.black_score += self.weights[type(piece)]
         else:
-            self.white_score += self.weights[type(piece)] 
-        self.pecas_capturadas.remove(piece) 
-        self.place_piece(piece, piece.linha, piece.coluna)        
-    
-    def move(self, linha, coluna):
-        self.remove_piece(self.piece_selected.linha, self.piece_selected.coluna)
-        self.piece_selected.moves +=1
+            self.white_score += self.weights[type(piece)]
+        self.pecas_capturadas.remove(piece)
+        self.place_piece(piece, piece.linha, piece.coluna)
 
-        pos_destino = self.get_piece(linha,coluna)
+    def promocao_peao(self):
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_r:
+                        return Rainha(self.piece_selected.linha, self.piece_selected.coluna, self.piece_selected.colour, tile_length, self.piece_selected.moves)
+                    elif event.key == pygame.K_t:
+                        return Torre(self.piece_selected.linha, self.piece_selected.coluna, self.piece_selected.colour, tile_length, self.piece_selected.moves)
+                    elif event.key == pygame.K_b:
+                        return Bispo(self.piece_selected.linha, self.piece_selected.coluna, self.piece_selected.colour, tile_length, self.piece_selected.moves)
+                    elif event.key == pygame.K_c:
+                        return Cavalo(self.piece_selected.linha, self.piece_selected.coluna,
+                                      self.piece_selected.colour, tile_length, self.piece_selected.moves)
+
+    def move(self, linha, coluna):
+        self.remove_piece(self.piece_selected.linha,
+                          self.piece_selected.coluna)
+        self.piece_selected.moves += 1
+
+        pos_destino = self.get_piece(linha, coluna)
         if pos_destino:
             self.capturar_peca(pos_destino)
-        
-        self.place_piece(self.piece_selected, linha, coluna)
 
+        # jogadaespecial roque
+        if self.piece_selected.name == "king" and coluna == (self.piece_selected.coluna + 2):
+            torre = self.get_piece(linha, self.piece_selected.coluna + 3)
+            self.remove_piece(linha, self.piece_selected.coluna + 3)
+            self.place_piece(torre, linha, self.piece_selected.coluna + 1)
+            torre.moves += 1
+        if self.piece_selected.name == "king" and coluna == (self.piece_selected.coluna - 2):
+            torre = self.get_piece(linha, self.piece_selected.coluna - 4)
+            self.remove_piece(linha, self.piece_selected.coluna - 4)
+            self.place_piece(torre, linha, self.piece_selected.coluna - 1)
+            torre.moves += 1
+
+        # # jogadaespecial promocao de peao
+        if self.piece_selected.name == "pawn":
+            if (self.piece_selected.colour == "white" and linha == 0) or (self.piece_selected.colour == "black" and linha == 7):
+                self.piece_selected = self.promocao_peao()
+
+        self.place_piece(self.piece_selected, linha, coluna)
         self.troca_turno()
         self.piece_selected = None
         self.possible_moves = []
 
-    #Recebe uma coordena referente ao clique do usuario na tela e decide a acao a ser tomada
+    # Recebe uma coordena referente ao clique do usuario na tela e decide a acao a ser tomada
     def validate_click(self, x, y):
         linha, coluna = (y//tile_length), (x//tile_length)
 
-        #Se eu já tiver uma peça selecionada, preciso mover ela
+        # Se eu já tiver uma peça selecionada, preciso mover ela
         if self.piece_selected:
             if [linha, coluna] in self.possible_moves:
                 if (self.piece_selected.name == 'pawn'):
                     self.fifty_moves = 0
                 self.move(linha, coluna)
                 self.piece_selected = None
-        #Caso eu não tenha uma peça selecionada ou eu não tenha clicado em um movimento possivel, vou trocar de pedra
+        # Caso eu não tenha uma peça selecionada ou eu não tenha clicado em um movimento possivel, vou trocar de pedra
         peca_origem = self.get_piece(linha, coluna)
         if peca_origem:
             if peca_origem.colour == self.jogador_atual:
@@ -263,19 +297,20 @@ class Tabuleiro(pygame.sprite.Sprite):
                     for move in self.piece_selected.get_movements(self):
                         for get_out_move in self.get_out_of_check_moves:
                             if (get_out_move[0].linha, get_out_move[0].coluna) == (self.piece_selected.linha, self.piece_selected.coluna):
-                                if (move[0], move[1]) == (get_out_move[1], get_out_move[2]): #se ele eh um movimento que tira a peca de xeque
+                                # se ele eh um movimento que tira a peca de xeque
+                                if (move[0], move[1]) == (get_out_move[1], get_out_move[2]):
                                     self.possible_moves.append(move)
                 else:
                     for move in self.piece_selected.get_movements(self):
                         if self.get_out_of_check(self.piece_selected, move[0], move[1]):
-                            self.possible_moves.append(move)            
+                            self.possible_moves.append(move)
 
     def get_all_movements(self, player):
         movements = set()
 
         for linha in range(8):
             for coluna in range(8):
-                peca = self.get_piece(linha,coluna)
+                peca = self.get_piece(linha, coluna)
 
                 if peca and peca.colour == player:
                     posicoes = peca.get_movements(self)
@@ -296,28 +331,28 @@ class Tabuleiro(pygame.sprite.Sprite):
         # print("==================")
         for linha in range(8):
             for coluna in range(8):
-                peca = self.get_piece(linha,coluna)
+                peca = self.get_piece(linha, coluna)
                 # if peca and peca.name == "king":
-                    # print(peca)
+                # print(peca)
                 if peca and peca.name == "king" and peca.colour == self.jogador_atual:
                     rei = peca
-    
+
         return (rei.linha, rei.coluna) in movements
 
     def get_out_of_check(self, peca, to_linha, to_coluna):
         from_linha = peca.linha
         from_coluna = peca.coluna
 
-        #faz um movimento fake
+        # faz um movimento fake
         peca.moves += 1
         self.remove_piece(peca.linha, peca.coluna)
         peca_destino = self.get_piece(to_linha, to_coluna)
         self.place_piece(peca, to_linha, to_coluna)
 
-        #is_in_check
+        # is_in_check
         is_in_check = self.is_in_check()
 
-        #desfaz movimento fake
+        # desfaz movimento fake
         peca.moves -= 1
         self.remove_piece(peca.linha, peca.coluna)
         self.place_piece(peca, from_linha, from_coluna)
@@ -330,16 +365,18 @@ class Tabuleiro(pygame.sprite.Sprite):
 
         for linha in range(8):
             for coluna in range(8):
-                peca = self.get_piece(linha,coluna)
+                peca = self.get_piece(linha, coluna)
 
                 if peca and peca.colour == self.jogador_atual:
                     posicoes = peca.get_movements(self)
 
                     for posicao in posicoes:
                         if self.get_out_of_check(peca, posicao[0], posicao[1]):
-                            self.get_out_of_check_moves.append((peca, posicao[0], posicao[1]))
+                            self.get_out_of_check_moves.append(
+                                (peca, posicao[0], posicao[1]))
 
-        if len(self.get_out_of_check_moves) == 0: #nao existem movimentos que tirem o jogador de xeque
+        # nao existem movimentos que tirem o jogador de xeque
+        if len(self.get_out_of_check_moves) == 0:
             return True
 
         return False
@@ -406,7 +443,7 @@ class Tabuleiro(pygame.sprite.Sprite):
         return black_draw and white_draw
         
     def stalemate(self):
-        #Se a funcao check_mate retorna true quando o jogador nao estah em xeque um stalemate aconteceu
+        # Se a funcao check_mate retorna true quando o jogador nao estah em xeque um stalemate aconteceu
         if self.check_mate():
             return True
         else:
@@ -416,14 +453,14 @@ class Tabuleiro(pygame.sprite.Sprite):
         colour_dict = {True: self.light_square, False: self.dark_square}
         current_colour = True
 
-
         for i in range(len(self.position)):
             if i % 8 != 0:
                 current_colour = not current_colour
             surface.blit(colour_dict[current_colour], self.position[i])
             for pm in self.possible_moves:
                 if((self.position[i][1]//tile_length, self.position[i][0]//tile_length) == (pm[0], pm[1])):
-                    pygame.draw.circle(surface, pygame.Color(0,0,0,220), (self.position[i][0]+tile_length/2, self.position[i][1]+tile_length/2), tile_length/4)
+                    pygame.draw.circle(surface, pygame.Color(
+                        0, 0, 0, 220), (self.position[i][0]+tile_length/2, self.position[i][1]+tile_length/2), tile_length/4)
 
         for i in range(8):
             for j in range(8):
@@ -451,13 +488,12 @@ class Tabuleiro(pygame.sprite.Sprite):
                     if event.button == 1:
                         x, y = event.pos  # sistema de coordenadas
 
-                        
-                        self.validate_click(x,y)
+                        self.validate_click(x, y)
 
             self.draw(self.surface)
             pygame.display.update()
             framesPerSecond.tick(FPS)
-            
+
             if not multiplayer and self.jogador_atual == 'black':
                 aux_board = self.copy()
                 mv = minimax(aux_board, 2, float('-inf'), float('inf'), True, 'black')
