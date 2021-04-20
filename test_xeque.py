@@ -5,7 +5,8 @@ import pygame
 
 display = pygame.display.set_mode(size)
 pygame.display.set_caption('Chess')
-display.fill((255,0,0))
+display.fill((255, 0, 0))
+
 
 class TestXeque:
     def test_is_in_check_by_queen_one(self):
@@ -93,7 +94,7 @@ class TestXeque:
         template_is_in_check = False
 
         assert board.is_in_check() == template_is_in_check
-        
+
     def test_is_in_check_by_bishop_one(self):
         # Gerando tabuleiro
         board = Tabuleiro(display)
@@ -315,15 +316,15 @@ class TestXeque:
         # Verificando se a movimentacao do proprio rei comendo o peao que o coloca em cheque consegue retirar o cheque
         king = board.get_piece(0, 4)
         assert board.get_out_of_check(king, 1, 5) == template_get_out_of_check
-    
+
     def test_check_mate_one(self):
         # Gerando tabuleiro
         board = Tabuleiro(display)
         board.clear_board()
 
         board.pecas_tabuleiro[1][7] = Torre(1, 7, "white", tile_length)
-        board.pecas_tabuleiro[5][5] = Rei(5, 5, "white", tile_length)
-        board.pecas_tabuleiro[5][6] = Rei(5, 7, "black", tile_length)
+        board.pecas_tabuleiro[5][5] = Rei(5, 5, "white", tile_length, moves=1)
+        board.pecas_tabuleiro[5][6] = Rei(5, 7, "black", tile_length, moves=1)
 
         board.jogador_atual = "black"
 
@@ -337,8 +338,8 @@ class TestXeque:
         board.clear_board()
 
         board.pecas_tabuleiro[1][5] = Rainha(1, 5, "white", tile_length)
-        board.pecas_tabuleiro[2][4] = Rei(2, 4, "white", tile_length)
-        board.pecas_tabuleiro[0][5] = Rei(0, 5, "black", tile_length)
+        board.pecas_tabuleiro[2][4] = Rei(2, 4, "white", tile_length, moves=1)
+        board.pecas_tabuleiro[0][5] = Rei(0, 5, "black", tile_length, moves=1)
 
         board.jogador_atual = "black"
 
@@ -352,8 +353,8 @@ class TestXeque:
         board.clear_board()
 
         board.pecas_tabuleiro[1][5] = Rainha(1, 4, "white", tile_length)
-        board.pecas_tabuleiro[2][4] = Rei(2, 4, "white", tile_length)
-        board.pecas_tabuleiro[0][5] = Rei(0, 5, "black", tile_length)
+        board.pecas_tabuleiro[2][4] = Rei(2, 4, "white", tile_length, moves=1)
+        board.pecas_tabuleiro[0][5] = Rei(0, 5, "black", tile_length, moves=1)
 
         board.jogador_atual = "black"
 
@@ -371,9 +372,9 @@ class TestXeque:
         white_pawn.linha = 3
         white_pawn.coluna = 5
         board.pecas_tabuleiro[3][5] = white_pawn
-        
+
         board.pecas_tabuleiro[1][5] = None
-        
+
         black_pawn = board.get_piece(1, 6)
         board.pecas_tabuleiro[1][6] = None
         black_pawn.linha = 3
@@ -402,9 +403,9 @@ class TestXeque:
         white_pawn.linha = 3
         white_pawn.coluna = 5
         board.pecas_tabuleiro[3][5] = white_pawn
-        
+
         board.pecas_tabuleiro[1][5] = None
-        
+
         black_pawn = board.get_piece(1, 6)
         board.pecas_tabuleiro[1][6] = None
         black_pawn.linha = 3
