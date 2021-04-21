@@ -85,8 +85,6 @@ class Tabuleiro(pygame.sprite.Sprite):
         if self.is_in_check():
             self.current_player_check = True
             is_in_check_mate = self.check_mate()
-            print("Check mate", is_in_check_mate)
-            print("get_out_of_check_moves", self.get_out_of_check_moves)
 
             if is_in_check_mate:
                 self.screen_mode = "final_screen"
@@ -96,7 +94,7 @@ class Tabuleiro(pygame.sprite.Sprite):
 
             if self.stalemate():
                 self.screen_mode = "draw_stalemate"
-
+                    
     def clear_board(self):
         self.pecas_tabuleiro = [[None for x in range(8)] for x in range(8)]
 
@@ -181,16 +179,36 @@ class Tabuleiro(pygame.sprite.Sprite):
         copy.weights = self.weights
 
         return copy
-
+    
+    def get_piece_out_of_check_moves(self, piece):
+        for movement in piece.get_movements(self):
+            for get_out_of_check_move in self.get_out_of_check_moves:
+                x_out_of_check, y_out_of_check = get_out_of_check_move[1], get_out_of_check_move[2]
+                if self.move_gets_piece_out_of_check(piece, x_out_of_check, y_out_of_check):
+                    x_move, y_move = movement
+                    if(x_move, y_move) == (x_out_of_check, y_out_of_check):
+                        return Move([piece.linha, piece.coluna], movement, None)
+        
+    
     def get_moves(self):
         moves = []
         for x in range(8):
             for y in range(8):
-                if self.pecas_tabuleiro[x][y] and self.pecas_tabuleiro[x][y].colour == self.jogador_atual:
-                    for movement in self.pecas_tabuleiro[x][y].get_movements(self):
-                        move = Move([x, y], movement, None)
-                        moves.append(move)
+                piece = self.pecas_tabuleiro[x][y]
+                if piece and piece.colour == self.jogador_atual:
+                    if self.current_player_check and self.get_piece_out_of_check_moves(piece):
+                        moves.append(self.get_out_of_check_moves_ai(piece))
+                    elif self.get_regular_move(piece):
+                        moves.append(self.get_regular_move(piece))
         return moves
+    
+    def get_regular_move(self, piece):
+        for movement in piece.get_movements(self):
+            if self.get_out_of_check(piece, movement[0], movement[1]):
+                return Move([piece.linha, piece.coluna], movement, None)        
+
+    def move_gets_piece_out_of_check(self, piece, x, y):
+        return (x,y) == (piece.linha, piece.coluna)
 
     def make_move(self, move):
         self.move_ai(move, move.from_coord, move.to_coord)
@@ -217,7 +235,6 @@ class Tabuleiro(pygame.sprite.Sprite):
 
         self.place_piece(piece, x_to, y_to)
 
-        # self.troca_turno()
         self.possible_moves = []
 
     def uncapture(self, piece):
@@ -328,12 +345,9 @@ class Tabuleiro(pygame.sprite.Sprite):
 
         rei = None
 
-        # print("==================")
         for linha in range(8):
             for coluna in range(8):
                 peca = self.get_piece(linha, coluna)
-                # if peca and peca.name == "king":
-                # print(peca)
                 if peca and peca.name == "king" and peca.colour == self.jogador_atual:
                     rei = peca
 
@@ -460,7 +474,7 @@ class Tabuleiro(pygame.sprite.Sprite):
             for pm in self.possible_moves:
                 if((self.position[i][1]//tile_length, self.position[i][0]//tile_length) == (pm[0], pm[1])):
                     pygame.draw.circle(surface, pygame.Color(
-                        0, 0, 0, 220), (self.position[i][0]+tile_length/2, self.position[i][1]+tile_length/2), tile_length/4)
+                        20, 20, 20), (self.position[i][0]+tile_length/2, self.position[i][1]+tile_length/2), tile_length/4)
 
         for i in range(8):
             for j in range(8):
@@ -477,6 +491,19 @@ class Tabuleiro(pygame.sprite.Sprite):
         self.pecas_tabuleiro = self.reseta_tabuleiro()
 
         while self.screen_mode == "playing":
+
+            if not multiplayer and self.jogador_atual == 'black':
+                aux_board = self.copy()
+                mv = minimax(aux_board, 2, float('-inf'),
+                             float('inf'), True, 'black')
+
+                piece = self.get_piece(mv[0].from_coord[0], mv[0].from_coord[0])
+                if piece and piece.name == 'pawn':
+                    self.fifty_moves = 0
+
+                self.make_move(mv[0])
+                self.troca_turno()
+
             for event in pygame.event.get():
                 if event.type == QUIT:
                     pygame.quit()
@@ -494,17 +521,12 @@ class Tabuleiro(pygame.sprite.Sprite):
             pygame.display.update()
             framesPerSecond.tick(FPS)
 
-            if not multiplayer and self.jogador_atual == 'black':
-                aux_board = self.copy()
-                mv = minimax(aux_board, 2, float('-inf'), float('inf'), True, 'black')
-                
-                piece = self.get_piece(mv[0].from_coord[0], mv[0].from_coord[0])
-                if piece and piece.name == 'pawn':
-                    self.fifty_moves = 0
+        self.get_final_screen()
 
-                self.make_move(mv[0])
-                self.troca_turno()
+        self.screen_mode = "playing"
 
+
+    def get_final_screen(self):
         if self.screen_mode == "final_screen":
             FinalScreen(self.surface, self.jogador_atual, win = True).loop()
         elif self.screen_mode == "draw_dead_position":
