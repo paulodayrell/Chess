@@ -231,18 +231,50 @@ class Tabuleiro(pygame.sprite.Sprite):
         self.place_piece(piece, piece.linha, piece.coluna)
 
     def promocao_peao(self):
+
+        margin = (3/8) * size[0]
+
+        colour = self.piece_selected.colour
+
+        queen = pygame.image.load("./sprites/128h/"+colour+"_queen.png")
+        queen = pygame.transform.scale(queen, (tile_length, tile_length))
+
+        knight = pygame.image.load("./sprites/128h/"+colour+"_knight.png")
+        knight = pygame.transform.scale(knight, (tile_length, tile_length))
+
+        rook = pygame.image.load("./sprites/128h/"+colour+"_rook.png")
+        rook = pygame.transform.scale(rook, (tile_length, tile_length))
+
+        bishop = pygame.image.load("./sprites/128h/"+colour+"_bishop.png")
+        bishop = pygame.transform.scale(bishop, (tile_length, tile_length))
+
         while True:
+            
+            rect = pygame.draw.polygon(self.surface, 'white', [[margin, margin], [size[0]-margin, margin], [size[0]-margin, size[1]-margin], [margin, size[1]-margin]])
+
+            self.surface.blit(queen, [margin, margin])
+            self.surface.blit(knight, [margin+tile_length, margin])
+            self.surface.blit(rook, [margin, margin+tile_length])
+            self.surface.blit(bishop, [margin+tile_length, margin+tile_length])
+
             for event in pygame.event.get():
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_r:
-                        return Rainha(self.piece_selected.linha, self.piece_selected.coluna, self.piece_selected.colour, tile_length, self.piece_selected.moves)
-                    elif event.key == pygame.K_t:
-                        return Torre(self.piece_selected.linha, self.piece_selected.coluna, self.piece_selected.colour, tile_length, self.piece_selected.moves)
-                    elif event.key == pygame.K_b:
-                        return Bispo(self.piece_selected.linha, self.piece_selected.coluna, self.piece_selected.colour, tile_length, self.piece_selected.moves)
-                    elif event.key == pygame.K_c:
-                        return Cavalo(self.piece_selected.linha, self.piece_selected.coluna,
-                                      self.piece_selected.colour, tile_length, self.piece_selected.moves)
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if event.button == 1:
+                            x, y = event.pos  # sistema de coordenadas
+
+                            if x >= margin and x <= size[0]-margin and y >= margin and y <= size[1]-margin:
+
+                                if x < margin+tile_length and y < margin+tile_length:
+                                    return Rainha(self.piece_selected.linha, self.piece_selected.coluna, self.piece_selected.colour, tile_length, self.piece_selected.moves)
+                                elif x < margin+tile_length and y >= margin+tile_length:
+                                    return Torre(self.piece_selected.linha, self.piece_selected.coluna, self.piece_selected.colour, tile_length, self.piece_selected.moves)
+                                elif x >= margin+tile_length and y < margin+tile_length:
+                                    return Cavalo(self.piece_selected.linha, self.piece_selected.coluna, self.piece_selected.colour, tile_length, self.piece_selected.moves)
+                                else:
+                                    return Bispo(self.piece_selected.linha, self.piece_selected.coluna, self.piece_selected.colour, tile_length, self.piece_selected.moves)
+                
+            # Atualiza somente a porcao da tela contida no rect
+            pygame.display.update(rect)
 
     def move(self, linha, coluna):
         self.remove_piece(self.piece_selected.linha,
@@ -265,7 +297,7 @@ class Tabuleiro(pygame.sprite.Sprite):
             self.place_piece(torre, linha, self.piece_selected.coluna - 1)
             torre.moves += 1
 
-        # # jogadaespecial promocao de peao
+        # jogada especial, promocao de peao
         if self.piece_selected.name == "pawn":
             if (self.piece_selected.colour == "white" and linha == 0) or (self.piece_selected.colour == "black" and linha == 7):
                 self.piece_selected = self.promocao_peao()
@@ -477,6 +509,7 @@ class Tabuleiro(pygame.sprite.Sprite):
         self.pecas_tabuleiro = self.reseta_tabuleiro()
 
         while self.screen_mode == "playing":
+
             for event in pygame.event.get():
                 if event.type == QUIT:
                     pygame.quit()
