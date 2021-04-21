@@ -23,6 +23,18 @@ class PawnPromotionScreen():
         ]
         self.running = True
 
+        self.queen_image = pygame.image.load("./sprites/128h/"+piece.colour+"_queen.png")
+        self.queen_image = pygame.transform.scale(self.queen_image, (tile_length, tile_length))
+
+        self.knight_image = pygame.image.load("./sprites/128h/"+piece.colour+"_knight.png")
+        self.knight_image = pygame.transform.scale(self.knight_image, (tile_length, tile_length))
+
+        self.rook_image = pygame.image.load("./sprites/128h/"+piece.colour+"_rook.png")
+        self.rook_image = pygame.transform.scale(self.rook_image, (tile_length, tile_length))
+
+        self.bishop_image = pygame.image.load("./sprites/128h/"+piece.colour+"_bishop.png")
+        self.bishop_image = pygame.transform.scale(self.bishop_image, (tile_length, tile_length))
+
         self.board = board
         self.piece = piece
 
@@ -30,6 +42,11 @@ class PawnPromotionScreen():
         surface.fill((124, 76, 62))
         for button in self.buttons:
             button.drawButton()
+
+        self.surface.blit(self.queen_image, [0 + (self.buttonSize["w"] / 2) - (tile_length / 2), 0 + tile_length / 2])
+        self.surface.blit(self.rook_image, [0 + (self.buttonSize["w"] / 2) - (tile_length / 2), self.buttonSize["w"] + tile_length / 2])
+        self.surface.blit(self.bishop_image, [self.buttonSize["h"] + (self.buttonSize["w"] / 2) - (tile_length / 2), 0 + tile_length / 2])
+        self.surface.blit(self.knight_image, [self.buttonSize["h"] + (self.buttonSize["w"] / 2) - (tile_length / 2), self.buttonSize["w"] + tile_length / 2])
 
     def loop(self):
         framesPerSecond = pygame.time.Clock()
