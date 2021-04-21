@@ -508,10 +508,10 @@ class Tabuleiro(pygame.sprite.Sprite):
         if self.screen_mode == "final_screen":
             FinalScreen(self.surface, self.jogador_atual, win = True).loop()
         elif self.screen_mode == "draw_dead_position":
-            FinalScreen(self.surface, self.jogador_atual, win = False).loop()
+            FinalScreen(self.surface, self.jogador_atual, win = False, draw_type = "Dead Position").loop()
         elif self.screen_mode == "draw_fifty_moves":
-            FinalScreen(self.surface, self.jogador_atual, win = False).loop()
+            FinalScreen(self.surface, self.jogador_atual, win = False, draw_type = "50 Movimentos").loop()
         elif self.screen_mode == "draw_stalemate":
-            FinalScreen(self.surface, self.jogador_atual, win = False).loop()
+            FinalScreen(self.surface, self.jogador_atual, win = False, draw_type = "Afogamento").loop()
 
         self.screen_mode = "playing"
