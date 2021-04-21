@@ -30,6 +30,6 @@ class Button:
 
     def click(self):
         if self.actionProps != None:
-            self.action(self.actionProps)
+            return self.action(self.actionProps)
         else:
-            self.action()
+            return self.action()

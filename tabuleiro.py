@@ -7,7 +7,7 @@ from Peca import *
 from minimax import *
 from move import Move
 from final_screen import *
-
+from pawn_promotion_screen import *
 
 class Tabuleiro(pygame.sprite.Sprite):
     def __init__(self, display):
@@ -231,18 +231,16 @@ class Tabuleiro(pygame.sprite.Sprite):
         self.place_piece(piece, piece.linha, piece.coluna)
 
     def promocao_peao(self):
-        while True:
-            for event in pygame.event.get():
-                if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_r:
-                        return Rainha(self.piece_selected.linha, self.piece_selected.coluna, self.piece_selected.colour, tile_length, self.piece_selected.moves)
-                    elif event.key == pygame.K_t:
-                        return Torre(self.piece_selected.linha, self.piece_selected.coluna, self.piece_selected.colour, tile_length, self.piece_selected.moves)
-                    elif event.key == pygame.K_b:
-                        return Bispo(self.piece_selected.linha, self.piece_selected.coluna, self.piece_selected.colour, tile_length, self.piece_selected.moves)
-                    elif event.key == pygame.K_c:
-                        return Cavalo(self.piece_selected.linha, self.piece_selected.coluna,
-                                      self.piece_selected.colour, tile_length, self.piece_selected.moves)
+        piece_name = PawnPromotionScreen(self.surface, self, self.piece_selected).loop()
+        
+        if piece_name == "queen":
+            return Rainha(self.piece_selected.linha, self.piece_selected.coluna, self.piece_selected.colour, tile_length, self.piece_selected.moves)
+        elif piece_name == "rook":
+            return Torre(self.piece_selected.linha, self.piece_selected.coluna, self.piece_selected.colour, tile_length, self.piece_selected.moves)
+        elif piece_name == "bishop":
+            return Bispo(self.piece_selected.linha, self.piece_selected.coluna, self.piece_selected.colour, tile_length, self.piece_selected.moves)
+        elif piece_name == "knight":
+            return Cavalo(self.piece_selected.linha, self.piece_selected.coluna, self.piece_selected.colour, tile_length, self.piece_selected.moves)          
 
     def move(self, linha, coluna):
         self.remove_piece(self.piece_selected.linha,
