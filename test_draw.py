@@ -308,9 +308,9 @@ class TestDraw:
         board = Tabuleiro(display)
         board.clear_board()
         board.jogador_atual = "black"
-        board.pecas_tabuleiro[0][4] = Rei(0, 4, "black", tile_length)
+        board.pecas_tabuleiro[0][4] = Rei(0, 4, "black", tile_length, moves=0)
         board.pecas_tabuleiro[1][4] = Peao(1, 4, "white", tile_length)
-        board.pecas_tabuleiro[2][4] = Rei(2, 4, "white", tile_length)
+        board.pecas_tabuleiro[2][4] = Rei(2, 4, "white", tile_length, moves=1)
         
         assert board.stalemate()
 
@@ -319,9 +319,9 @@ class TestDraw:
         board = Tabuleiro(display)
         board.clear_board()
         board.jogador_atual = "black"
-        board.pecas_tabuleiro[0][0] = Rei(0, 0, "black", tile_length)
+        board.pecas_tabuleiro[0][0] = Rei(0, 0, "black", tile_length, moves=1)
         board.pecas_tabuleiro[1][0] = Peao(1, 0, "white", tile_length)
-        board.pecas_tabuleiro[2][1] = Rei(2, 1, "white", tile_length)
+        board.pecas_tabuleiro[2][1] = Rei(2, 1, "white", tile_length, moves=1)
         
         assert board.stalemate()
 
@@ -330,8 +330,8 @@ class TestDraw:
         board = Tabuleiro(display)
         board.clear_board()
         board.jogador_atual = "black"
-        board.pecas_tabuleiro[0][7] = Rei(0, 7, "black", tile_length)
-        board.pecas_tabuleiro[2][6] = Rei(2, 6, "white", tile_length)
+        board.pecas_tabuleiro[0][7] = Rei(0, 7, "black", tile_length, moves=1)
+        board.pecas_tabuleiro[2][6] = Rei(2, 6, "white", tile_length, moves=1)
         board.pecas_tabuleiro[2][7] = Peao(2, 7, "white", tile_length)
         board.pecas_tabuleiro[3][3] = Bispo(3, 3, "white", tile_length)
         
@@ -342,10 +342,10 @@ class TestDraw:
         board = Tabuleiro(display)
         board.clear_board()
         board.jogador_atual = "white"
-        board.pecas_tabuleiro[0][7] = Rei(0, 7, "white", tile_length)
+        board.pecas_tabuleiro[0][7] = Rei(0, 7, "white", tile_length, moves=1)
         board.pecas_tabuleiro[1][7] = Peao(1, 7, "white", tile_length)
         board.pecas_tabuleiro[2][6] = Rainha(2, 6, "black", tile_length)
-        board.pecas_tabuleiro[5][1] = Rei(5, 1, "black", tile_length)
+        board.pecas_tabuleiro[5][1] = Rei(5, 1, "black", tile_length, moves=1)
         
         assert board.stalemate()
 
@@ -355,8 +355,8 @@ class TestDraw:
         board.clear_board()
         board.jogador_atual = "white"
         board.pecas_tabuleiro[1][5] = Bispo(2, 6, "black", tile_length)
-        board.pecas_tabuleiro[2][5] = Rei(2, 5, "black", tile_length)
-        board.pecas_tabuleiro[2][7] = Rei(2, 7, "white", tile_length)
+        board.pecas_tabuleiro[2][5] = Rei(2, 5, "black", tile_length, moves=1)
+        board.pecas_tabuleiro[2][7] = Rei(2, 7, "white", tile_length, moves=1)
         
         assert board.stalemate()
 
@@ -366,8 +366,8 @@ class TestDraw:
         board.clear_board()
         board.jogador_atual = "black"
         board.pecas_tabuleiro[2][0] = Peao(2, 0, "black", tile_length)
-        board.pecas_tabuleiro[3][0] = Rei(3, 0, "black", tile_length)
-        board.pecas_tabuleiro[3][2] = Rei(3, 2, "white", tile_length)
+        board.pecas_tabuleiro[3][0] = Rei(3, 0, "black", tile_length, moves=1)
+        board.pecas_tabuleiro[3][2] = Rei(3, 2, "white", tile_length, moves=1)
         board.pecas_tabuleiro[4][1] = Peao(4, 1, "black", tile_length)
         board.pecas_tabuleiro[4][2] = Peao(4, 2, "white", tile_length)
         board.pecas_tabuleiro[5][1] = Peao(5, 1, "white", tile_length)
@@ -381,8 +381,8 @@ class TestDraw:
         board.clear_board()
         board.jogador_atual = "white"
         board.pecas_tabuleiro[2][6] = Bispo(2, 6, "black", tile_length)
-        board.pecas_tabuleiro[2][5] = Rei(2, 5, "black", tile_length)
-        board.pecas_tabuleiro[2][7] = Rei(2, 7, "white", tile_length)
+        board.pecas_tabuleiro[2][5] = Rei(2, 5, "black", tile_length, moves=1)
+        board.pecas_tabuleiro[2][7] = Rei(2, 7, "white", tile_length, moves=1)
         board.pecas_tabuleiro[6][5] = Torre(6, 5, "black", tile_length)
         
         assert board.stalemate()
