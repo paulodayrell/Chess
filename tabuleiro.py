@@ -401,6 +401,14 @@ class Tabuleiro(pygame.sprite.Sprite):
         self.pecas_tabuleiro = self.reseta_tabuleiro()
 
         while self.screen_mode == "playing":
+
+            if not multiplayer and self.jogador_atual == 'black':
+                aux_board = self.copy()
+                mv = minimax(aux_board, 2, float('-inf'),
+                             float('inf'), True, 'black')
+                self.make_move(mv[0])
+                self.troca_turno()
+
             for event in pygame.event.get():
                 if event.type == QUIT:
                     pygame.quit()
@@ -417,13 +425,6 @@ class Tabuleiro(pygame.sprite.Sprite):
             self.draw(self.surface)
             pygame.display.update()
             framesPerSecond.tick(FPS)
-
-            if not multiplayer and self.jogador_atual == 'black':
-                aux_board = self.copy()
-                mv = minimax(aux_board, 2, float('-inf'),
-                             float('inf'), True, 'black')
-                self.make_move(mv[0])
-                self.troca_turno()
 
         self.get_final_screen()
 
