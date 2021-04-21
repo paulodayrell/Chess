@@ -85,8 +85,6 @@ class Tabuleiro(pygame.sprite.Sprite):
         if self.is_in_check():
             self.current_player_check = True
             is_in_check_mate = self.check_mate()
-            print("Check mate", is_in_check_mate)
-            print("get_out_of_check_moves", self.get_out_of_check_moves)
 
             if is_in_check_mate:
                 self.screen_mode = "final_screen"
@@ -347,12 +345,9 @@ class Tabuleiro(pygame.sprite.Sprite):
 
         rei = None
 
-        # print("==================")
         for linha in range(8):
             for coluna in range(8):
                 peca = self.get_piece(linha, coluna)
-                # if peca and peca.name == "king":
-                # print(peca)
                 if peca and peca.name == "king" and peca.colour == self.jogador_atual:
                     rei = peca
 
@@ -479,7 +474,7 @@ class Tabuleiro(pygame.sprite.Sprite):
             for pm in self.possible_moves:
                 if((self.position[i][1]//tile_length, self.position[i][0]//tile_length) == (pm[0], pm[1])):
                     pygame.draw.circle(surface, pygame.Color(
-                        0, 0, 0, 220), (self.position[i][0]+tile_length/2, self.position[i][1]+tile_length/2), tile_length/4)
+                        20, 20, 20), (self.position[i][0]+tile_length/2, self.position[i][1]+tile_length/2), tile_length/4)
 
         for i in range(8):
             for j in range(8):
