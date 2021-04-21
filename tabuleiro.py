@@ -103,11 +103,17 @@ class Tabuleiro(pygame.sprite.Sprite):
     def reseta_tabuleiro(self):
         def gerar_pecas(cor):
             if cor == "black":
-                return [Torre(0, 0, cor, tile_length), Cavalo(0, 1, cor, tile_length), Bispo(0, 2, cor, tile_length), Rainha(0, 3, cor, tile_length),
-                        Rei(0, 4, cor, tile_length), Bispo(0, 5, cor, tile_length), Cavalo(0, 6, cor, tile_length), Torre(0, 7, cor, tile_length)]
+                # return [Torre(0, 0, cor, tile_length), Cavalo(0, 1, cor, tile_length), Bispo(0, 2, cor, tile_length), Rainha(0, 3, cor, tile_length),
+                #         Rei(0, 4, cor, tile_length), Bispo(0, 5, cor, tile_length), Cavalo(0, 6, cor, tile_length), Torre(0, 7, cor, tile_length)]
+                return [None, None, None, None,
+                    Rei(0, 4, cor, tile_length), None, None, None]
             else:
-                return [Torre(7, 0, cor, tile_length), Cavalo(7, 1, cor, tile_length), Bispo(7, 2, cor, tile_length), Rainha(7, 3, cor, tile_length),
-                        Rei(7, 4, cor, tile_length), Bispo(7, 5, cor, tile_length), Cavalo(7, 6, cor, tile_length), Torre(7, 7, cor, tile_length)]
+                # return [Torre(7, 0, cor, tile_length), Cavalo(7, 1, cor, tile_length), Bispo(7, 2, cor, tile_length), Rainha(7, 3, cor, tile_length),
+                #         Rei(7, 4, cor, tile_length), Bispo(7, 5, cor, tile_length), Cavalo(7, 6, cor, tile_length), Torre(7, 7, cor, tile_length)]
+
+                return [None, None, None, None,
+                        Rei(7, 4, cor, tile_length), None, None, None]
+
 
         board = [[None for x in range(8)] for x in range(8)]
 
@@ -502,8 +508,12 @@ class Tabuleiro(pygame.sprite.Sprite):
                 mv = minimax(aux_board, 2, float('-inf'),
                              float('inf'), True, 'black')
 
-                piece = self.get_piece(mv[0].from_coord[0], mv[0].from_coord[0])
+                piece = self.get_piece(mv[0].from_coord[0], mv[0].from_coord[1])
                 if piece and piece.name == 'pawn':
+                    if mv[0].to_coord[0] == 7:
+                        queen = Rainha(piece.linha, piece.coluna, piece.colour, tile_length, piece.moves)
+                        self.place_piece(queen, queen.linha, queen.coluna)
+
                     self.fifty_moves = 0
 
                 self.make_move(mv[0])
