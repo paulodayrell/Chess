@@ -8,12 +8,13 @@ class Menu():
         self.surface = display
         self.buttonSize = {
             "w": 300,
-            "h": 100
+            "h": 70
         }
         self.buttons = [
-            Button( self.surface, 'Um Jogador', self.gotoBoardScreen, False, (190, 190, 190), self.surface.get_width() / 2 - (self.buttonSize["w"] / 2), self.surface.get_height() / 2 - (self.buttonSize["h"] / 2) - (2 * self.buttonSize["h"]), self.buttonSize["w"], self.buttonSize["h"]),
-            Button( self.surface, 'Multijogador', self.gotoBoardScreen, True, (190, 190, 190), self.surface.get_width() / 2 - (self.buttonSize["w"] / 2), self.surface.get_height() / 2 - (self.buttonSize["h"] / 2), self.buttonSize["w"], self.buttonSize["h"]),
-            Button( self.surface, 'Sair', self.exit, None, (190, 190, 190), self.surface.get_width() / 2 - (self.buttonSize["w"] / 2), self.surface.get_height() / 2 - (self.buttonSize["h"] / 2) + (2 * self.buttonSize["h"]), self.buttonSize["w"], self.buttonSize["h"])
+            Button( self.surface, 'Um Jogador', self.gotoBoardScreen, 0, (190, 190, 190), self.surface.get_width() / 2 - (self.buttonSize["w"] / 2), self.surface.get_height() / 2 - (self.buttonSize["h"] / 4) - (2 * self.buttonSize["h"]), self.buttonSize["w"], self.buttonSize["h"]),
+            Button( self.surface, 'Multijogador', self.gotoBoardScreen, 1, (190, 190, 190), self.surface.get_width() / 2 - (self.buttonSize["w"] / 2), self.surface.get_height() / 2 - (self.buttonSize["h"] / 4) - (1/2 * self.buttonSize["h"]), self.buttonSize["w"], self.buttonSize["h"]),
+            Button( self.surface, 'IA X IA', self.gotoBoardScreen, 2, (190, 190, 190), self.surface.get_width() / 2 - (self.buttonSize["w"] / 2), self.surface.get_height() / 2 - (self.buttonSize["h"] / 4) + 1 * self.buttonSize["h"], self.buttonSize["w"], self.buttonSize["h"]),
+            Button( self.surface, 'Sair', self.exit, None, (190, 190, 190), self.surface.get_width() / 2 - (self.buttonSize["w"] / 2), self.surface.get_height() / 2 - (self.buttonSize["h"] / 4) + (2.5 * self.buttonSize["h"]), self.buttonSize["w"], self.buttonSize["h"])
         ]
 
         self.board = board
@@ -29,7 +30,7 @@ class Menu():
         textTitle = pygame.font.Font.render(pygame.font.SysFont('comicsansms', 32), "Menu", 1, (0, 0, 0)) 
         textTitlePos = textTitle.get_rect()
         textTitlePos.centerx = surface.get_rect().centerx
-        textTitlePos.y = 50
+        textTitlePos.y = buttonHeight/4
         surface.blit(textTitle, textTitlePos)
 
         for button in self.buttons:
@@ -65,9 +66,12 @@ class Menu():
             pygame.display.update()
             framesPerSecond.tick(FPS)
 
-    def gotoBoardScreen(self, multiplayer):
+    def gotoBoardScreen(self, type_game):
+        # 0 : player x AI
+        # 1 : player x player
+        # 2 : AI X AI
         self.board.reset() # Reseta o tabuleiro antes de iniciar um novo jogo
-        self.board.loop(multiplayer)
+        self.board.loop(type_game)
 
     def exit(self):
         pygame.quit()
