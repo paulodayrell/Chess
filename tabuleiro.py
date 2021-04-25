@@ -495,8 +495,12 @@ class Tabuleiro(pygame.sprite.Sprite):
                 mv = minimax(aux_board, 2, float('-inf'),
                              float('inf'), True, 'black')
 
-                piece = self.get_piece(mv[0].from_coord[0], mv[0].from_coord[0])
+                piece = self.get_piece(mv[0].from_coord[0], mv[0].from_coord[1])
                 if piece and piece.name == 'pawn':
+                    if mv[0].to_coord[0] == 7:
+                        queen = Rainha(piece.linha, piece.coluna, piece.colour, tile_length, piece.moves)
+                        self.place_piece(queen, queen.linha, queen.coluna)
+
                     self.fifty_moves = 0
 
                 self.make_move(mv[0])
