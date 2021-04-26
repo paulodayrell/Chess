@@ -64,6 +64,7 @@ class Tabuleiro(pygame.sprite.Sprite):
         self.screen_mode = "playing"
 
     def troca_turno(self):
+
         self.jogador_atual = 'black' if self.jogador_atual == 'white' else 'white'
         self.turnos += 1
 
