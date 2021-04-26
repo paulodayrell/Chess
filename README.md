@@ -12,5 +12,6 @@
 	  > No windows, com o PowerShell aberto: ".{nomeDoAmbienteVirtual}\Scripts\Activate.ps1"
 	 - com o ambiente virtual ativo, entrar na pasta do projeto clonado e  rodar “pip install -r requirements.txt”
 
-### Promocao de peão
-Quando for promover o peão, apertar "r" para rainha, "t" para torre, "b" para bispo e "c" para cavalo
+### Para rodar os testes
+
+Estando na raiz do projeto executar: `python3 -m pytest`
