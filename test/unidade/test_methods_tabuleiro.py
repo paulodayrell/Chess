@@ -289,13 +289,74 @@ def test_promocao_peao(mock_PawnPromotionScreen, mock_Cavalo, mock_Bispo, mock_T
     board.piece_selected = mock.Mock(**{'linha':0, 'coluna':0, 'colour':'white', 'moves':0})
 
     board.promocao_peao()
-    mock_Rainha.assert_called_once_with(0,0,'white',64,0)
+    mock_Rainha.assert_called_once_with(0,0,'white',tile_length,0)
     board.promocao_peao()
-    mock_Torre.assert_called_once_with(0,0,'white',64,0)
+    mock_Torre.assert_called_once_with(0,0,'white',tile_length,0)
     board.promocao_peao()
-    mock_Bispo.assert_called_once_with(0,0,'white',64,0)
+    mock_Bispo.assert_called_once_with(0,0,'white',tile_length,0)
     board.promocao_peao()
-    mock_Cavalo.assert_called_once_with(0,0,'white',64,0)
+    mock_Cavalo.assert_called_once_with(0,0,'white',tile_length,0)
 
-def test_validate_click():
-    
+@mock.patch("tabuleiro.Tabuleiro.get_piece")
+@mock.patch("tabuleiro.Tabuleiro.move")
+def test_validate_click_primeiro(mock_self_move, mock_self_get_piece):
+
+    mock_piece_selected = mock.Mock()
+    mock_piece_selected.name = 'pawn'
+    mock_self_get_piece.return_value = None
+
+    board = Tabuleiro(display)
+
+    board.piece_selected = mock_piece_selected
+    board.possible_moves = [[1,2]]
+
+    board.validate_click(tile_length*2,tile_length)
+
+    assert board.fifty_moves == 0
+    assert board.piece_selected == None
+    mock_self_move.assert_called_once_with(1,2)
+
+@mock.patch("tabuleiro.Tabuleiro.get_piece")
+@mock.patch("tabuleiro.Tabuleiro.move")
+def test_validate_click_segundo_in_check(mock_self_move, mock_self_get_piece):
+
+    mock_peca_clicada = mock.Mock(**{'linha':1, 'coluna':2, 'colour':'black', 'get_movements.return_value':[[2,3]]})
+
+    mock_self_get_piece.return_value = mock_peca_clicada
+
+    board = Tabuleiro(display)
+
+    board.piece_selected = None
+    board.jogador_atual = "black"
+    board.current_player_check = True
+    board.get_out_of_check_moves = [(mock.Mock(**{'linha':1, 'coluna':2}), 2, 3)]
+
+    board.validate_click(tile_length*2,tile_length)
+
+    assert board.possible_moves == [[2,3]]
+    assert board.piece_selected == mock_peca_clicada
+
+@mock.patch("tabuleiro.Tabuleiro.get_out_of_check")
+@mock.patch("tabuleiro.Tabuleiro.get_piece")
+@mock.patch("tabuleiro.Tabuleiro.move")
+def test_validate_click_segundo_not_in_check(mock_self_move, mock_self_get_piece, mock_self_get_out_of_check):
+
+    def side_effect_get_out_of_check(peca,linha,coluna):
+        if peca.linha == 1 and peca.coluna == 2 and linha == 2 and coluna == 3:
+            return True
+
+    mock_peca_clicada = mock.Mock(**{'linha':1, 'coluna':2, 'colour':'black', 'get_movements.return_value':[[2,3]]})
+
+    mock_self_get_piece.return_value = mock_peca_clicada
+    mock_self_get_out_of_check.side_effect = side_effect_get_out_of_check
+
+    board = Tabuleiro(display)
+
+    board.piece_selected = None
+    board.jogador_atual = "black"
+    board.current_player_check = False
+    board.get_out_of_check_moves = [(mock.Mock(**{'linha':1, 'coluna':2}), 2, 3)]
+
+    board.validate_click(tile_length*2,tile_length)
+
+    assert board.possible_moves == [[2,3]]
