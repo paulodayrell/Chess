@@ -223,4 +223,17 @@ class Peao(Peca):
             if tabuleiro.pode_mover(self, linha, coluna) and tabuleiro.get_piece(linha, coluna):
                 moveset.append([linha, coluna])
 
+        if self.colour == "white" and self.linha == 3:
+            c1, c2 = self.coluna - 1, self.coluna + 1
+            if tabuleiro.posicao_valida(self.linha, c1) and tabuleiro.get_piece(self.linha, c1) == tabuleiro.peao_vulneravel:
+                moveset.append([self.linha - 1, c1])
+            if tabuleiro.posicao_valida(self.linha, c2) and tabuleiro.get_piece(self.linha, c2) == tabuleiro.peao_vulneravel:
+                moveset.append([self.linha - 1, c2])
+        if self.colour == "black" and self.linha == 4:
+            c1, c2 = self.coluna - 1, self.coluna + 1
+            if tabuleiro.posicao_valida(self.linha, c1) and tabuleiro.get_piece(self.linha, c1) == tabuleiro.peao_vulneravel:
+                moveset.append([self.linha + 1, c1])
+            if tabuleiro.posicao_valida(self.linha, c2) and tabuleiro.get_piece(self.linha, c2) == tabuleiro.peao_vulneravel:
+                moveset.append([self.linha + 1, c2])
+
         return moveset
