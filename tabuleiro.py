@@ -409,6 +409,9 @@ class Tabuleiro(pygame.sprite.Sprite):
             else:
                 pecas_pretas[peca.name] -= 1
 
+        print(pecas_brancas)
+        print(pecas_pretas)
+
         lone_king_white = True
         king_bishop_white = True
         king_knight_white = True

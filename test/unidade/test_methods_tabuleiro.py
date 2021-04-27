@@ -360,3 +360,130 @@ def test_validate_click_segundo_not_in_check(mock_self_move, mock_self_get_piece
     board.validate_click(tile_length*2,tile_length)
 
     assert board.possible_moves == [[2,3]]
+
+@mock.patch("tabuleiro.Tabuleiro.get_piece")
+@mock.patch("tabuleiro.Tabuleiro.get_all_movements")
+def test_is_in_check(mock_self_get_all_movements, mock_self_get_piece):
+
+    mock_rei = mock.Mock(**{'linha':0, 'coluna':4, 'colour':'black'})
+    mock_rei.name = 'king'
+
+    def side_effect_get_piece(linha,coluna):
+        if (linha,coluna) == (0,4):
+            return mock_rei
+        else:
+            return None
+
+    mock_self_get_all_movements.return_value = [(0,4),(1,1)]
+    mock_self_get_piece.side_effect = side_effect_get_piece
+
+    board = Tabuleiro(display)
+
+    board.jogador_atual = "black"
+
+    assert board.is_in_check() == True
+
+@mock.patch("tabuleiro.Tabuleiro.is_in_check")
+@mock.patch("tabuleiro.Tabuleiro.place_piece")
+@mock.patch("tabuleiro.Tabuleiro.get_piece")
+@mock.patch("tabuleiro.Tabuleiro.remove_piece")
+def test_get_out_of_check(mock_self_remove_piece, mock_self_get_piece, mock_self_place_piece, mock_self_is_in_check):
+
+    mock_peca_destino = mock.Mock()
+    mock_self_get_piece.return_value = mock_peca_destino
+
+    mock_peca = mock.Mock(**{'linha':0, 'coluna':0, 'moves':0})
+
+    mock_self_is_in_check.return_value = True
+
+    board = Tabuleiro(display)
+
+    assert board.get_out_of_check(mock_peca, 1, 1) == False
+    assert mock_peca.moves == 0
+    mock_self_remove_piece.assert_any_call(0,0)
+    mock_self_place_piece.assert_any_call(mock_peca,1,1)
+    mock_self_place_piece.assert_any_call(mock_peca,0,0)
+    mock_self_place_piece.assert_any_call(mock_peca_destino,1,1)
+
+@pytest.mark.parametrize("condicao1, condicao2, expected", [(1,2,True),(1,3,True),(1,0,False),(2,3,True),(2,0,False),(3,3,True)])
+def test_dead_position(condicao1, condicao2, expected):
+
+    pecas_unicas = ['queen','king']
+    pecas_duplas = ['rook','bishop','knight']
+    pecas_multiplas = ['pawn']
+
+    board = Tabuleiro(display)
+
+    board.pecas_capturadas = []
+
+    manter_brancas = []
+    manter_pretas = []
+
+    mantidas_brancas = []
+    mantidas_pretas = []
+
+    if(condicao1 == 1):
+        manter_brancas = ['king']
+    elif(condicao1 == 2):
+        manter_brancas = ['king', 'bishop']
+    elif(condicao1 == 3):
+        manter_brancas = ['king', 'knight']
+    else:
+        manter_brancas = None
+
+    if(condicao2 == 1):
+        manter_pretas = ['king']
+    elif(condicao2 == 2):
+        manter_pretas = ['king', 'bishop']
+    elif(condicao2 == 3):
+        manter_pretas = ['king', 'knight']
+    else:
+        manter_pretas = None
+
+    for nome in pecas_unicas:
+        if manter_brancas and nome not in manter_brancas or nome in mantidas_brancas:
+            peca = mock.Mock(**{'colour':'white'})
+            peca.name = nome
+            board.pecas_capturadas.append(peca)
+        else:
+            mantidas_brancas.append(nome)
+
+    for nome in pecas_duplas:
+        for i in range(2):
+            if manter_brancas and nome not in manter_brancas or nome in mantidas_brancas:
+                peca = mock.Mock(**{'colour':'white'})
+                peca.name = nome
+                board.pecas_capturadas.append(peca)
+            else:
+                mantidas_brancas.append(nome)
+
+    if manter_brancas:
+        for i in range(8):
+            peca = mock.Mock(**{'colour':'white'})
+            peca.name = 'pawn'
+            board.pecas_capturadas.append(peca)
+
+    for nome in pecas_unicas:
+        if manter_pretas and nome not in manter_pretas or nome in mantidas_pretas:
+            peca = mock.Mock(**{'colour':'black'})
+            peca.name = nome
+            board.pecas_capturadas.append(peca)
+        else:
+            mantidas_pretas.append(nome)
+
+    for nome in pecas_duplas:
+        for i in range(2):
+            if manter_pretas and nome not in manter_pretas or nome in mantidas_pretas:
+                peca = mock.Mock(**{'colour':'black'})
+                peca.name = nome
+                board.pecas_capturadas.append(peca)
+            else:
+                mantidas_pretas.append(nome)
+
+    if manter_pretas:
+        for i in range(8):
+            peca = mock.Mock(**{'colour':'black'})
+            peca.name = 'pawn'
+            board.pecas_capturadas.append(peca)
+
+    assert board.dead_position() == expected
