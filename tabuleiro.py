@@ -64,6 +64,7 @@ class Tabuleiro(pygame.sprite.Sprite):
         self.screen_mode = "playing"
 
     def troca_turno(self):
+
         self.jogador_atual = 'black' if self.jogador_atual == 'white' else 'white'
         self.turnos += 1
 
@@ -262,25 +263,27 @@ class Tabuleiro(pygame.sprite.Sprite):
     def move(self, linha, coluna):
         self.remove_piece(self.piece_selected.linha,
                           self.piece_selected.coluna)
+        
         self.piece_selected.moves += 1
 
         pos_destino = self.get_piece(linha, coluna)
         if pos_destino:
             self.capturar_peca(pos_destino)
 
-        # jogadaespecial roque
+        # jogada especial roque
         if self.piece_selected.name == "king" and coluna == (self.piece_selected.coluna + 2):
             torre = self.get_piece(linha, self.piece_selected.coluna + 3)
             self.remove_piece(linha, self.piece_selected.coluna + 3)
             self.place_piece(torre, linha, self.piece_selected.coluna + 1)
             torre.moves += 1
+        
         if self.piece_selected.name == "king" and coluna == (self.piece_selected.coluna - 2):
             torre = self.get_piece(linha, self.piece_selected.coluna - 4)
             self.remove_piece(linha, self.piece_selected.coluna - 4)
             self.place_piece(torre, linha, self.piece_selected.coluna - 1)
             torre.moves += 1
 
-        # # jogadaespecial promocao de peao
+        # jogada especial promocao de peao
         if self.piece_selected.name == "pawn":
             if (self.piece_selected.colour == "white" and linha == 0) or (self.piece_selected.colour == "black" and linha == 7):
                 self.piece_selected = self.promocao_peao()
@@ -405,6 +408,9 @@ class Tabuleiro(pygame.sprite.Sprite):
                 pecas_brancas[peca.name] -= 1
             else:
                 pecas_pretas[peca.name] -= 1
+
+        print(pecas_brancas)
+        print(pecas_pretas)
 
         lone_king_white = True
         king_bishop_white = True
