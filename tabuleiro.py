@@ -508,12 +508,16 @@ class Tabuleiro(pygame.sprite.Sprite):
                                   True, (255, 255, 255))
                 surface.blit(img, self.position[j*8+i])
 
-    def loop(self, multiplayer):
+    def loop(self, type_game):
         framesPerSecond = pygame.time.Clock()
         self.pecas_tabuleiro = self.reseta_tabuleiro()
 
         while self.screen_mode == "playing":
 
+            if type_game == 2:
+                self.ai_play()
+                time.sleep(1)
+        
             if not multiplayer and self.jogador_atual == 'black':
                 aux_board = self.copy()
                 mv = minimax(aux_board, 2, float('-inf'),
@@ -532,6 +536,9 @@ class Tabuleiro(pygame.sprite.Sprite):
                 self.make_move(mv[0])
                 self.troca_turno()
 
+            if type_game == 0 and self.jogador_atual == 'black':
+                self.ai_play()
+            
             for event in pygame.event.get():
                 if event.type == QUIT:
                     pygame.quit()
@@ -567,3 +574,20 @@ class Tabuleiro(pygame.sprite.Sprite):
                         win=False, draw_type="Afogamento").loop()
 
         self.screen_mode = "playing"
+
+
+    def ai_play(self):
+        aux_board = self.copy()
+        mv = minimax(aux_board, 2, float('-inf'),
+                        float('inf'), True, self.jogador_atual)
+
+        piece = self.get_piece(mv[0].from_coord[0], mv[0].from_coord[1])
+        if piece and piece.name == 'pawn':
+            if mv[0].to_coord[0] == 7:
+                queen = Rainha(piece.linha, piece.coluna, piece.colour, tile_length, piece.moves)
+                self.place_piece(queen, queen.linha, queen.coluna)
+
+            self.fifty_moves = 0
+
+        self.make_move(mv[0])
+        self.troca_turno()

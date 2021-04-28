@@ -5,7 +5,7 @@ from config import *
 import time
 
 class FinalScreen():
-    def __init__(self, display, looser, win, draw_type):
+    def __init__(self, display, looser, win, draw_type = None):
         self.surface = display
         self.looser = looser # Indica o jogador perdedor
         self.start_time = None # Tempo que indica quando a funcao loop foi chamada pela primeira vez
