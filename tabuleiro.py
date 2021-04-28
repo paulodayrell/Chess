@@ -311,6 +311,7 @@ class Tabuleiro(pygame.sprite.Sprite):
     # Recebe uma coordena referente ao clique do usuario na tela e decide a acao a ser tomada
     def validate_click(self, x, y):
         linha, coluna = (y//tile_length), (x//tile_length)
+        if not self.posicao_valida(linha, coluna): return
 
         # Se eu já tiver uma peça selecionada, preciso mover ela
         if self.piece_selected:
