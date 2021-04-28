@@ -298,10 +298,6 @@ class Tabuleiro(pygame.sprite.Sprite):
             if (self.piece_selected.colour == "white" and linha == 0) or (self.piece_selected.colour == "black" and linha == 7):
                 self.piece_selected = self.promocao_peao()
 
-            # en passant
-            print(self.piece_selected.linha)
-            print("\n\n\n\n")
-            print(self.piece_selected.linha + 2)
             if (self.piece_selected.linha + 2) == linha or (self.piece_selected.linha - 2) == linha:
                 self.peao_vulneravel = self.piece_selected
             else:
@@ -412,7 +408,6 @@ class Tabuleiro(pygame.sprite.Sprite):
         # nao existem movimentos que tirem o jogador de xeque
         if len(self.get_out_of_check_moves) == 0:
             return True
-        print(str(self.get_out_of_check_moves) + "posicoes para sair do check")
         return False
 
     def dead_position(self):
@@ -429,9 +424,6 @@ class Tabuleiro(pygame.sprite.Sprite):
                 pecas_brancas[peca.name] -= 1
             else:
                 pecas_pretas[peca.name] -= 1
-
-        print(pecas_brancas)
-        print(pecas_pretas)
 
         lone_king_white = True
         king_bishop_white = True
@@ -517,8 +509,8 @@ class Tabuleiro(pygame.sprite.Sprite):
             if type_game == 2:
                 self.ai_play()
                 time.sleep(1)
-        
-            if not multiplayer and self.jogador_atual == 'black':
+
+            if not type_game == 1 and self.jogador_atual == 'black':
                 aux_board = self.copy()
                 mv = minimax(aux_board, 2, float('-inf'),
                              float('inf'), True, 'black')
@@ -538,7 +530,7 @@ class Tabuleiro(pygame.sprite.Sprite):
 
             if type_game == 0 and self.jogador_atual == 'black':
                 self.ai_play()
-            
+
             for event in pygame.event.get():
                 if event.type == QUIT:
                     pygame.quit()
@@ -575,16 +567,16 @@ class Tabuleiro(pygame.sprite.Sprite):
 
         self.screen_mode = "playing"
 
-
     def ai_play(self):
         aux_board = self.copy()
         mv = minimax(aux_board, 2, float('-inf'),
-                        float('inf'), True, self.jogador_atual)
+                     float('inf'), True, self.jogador_atual)
 
         piece = self.get_piece(mv[0].from_coord[0], mv[0].from_coord[1])
         if piece and piece.name == 'pawn':
             if mv[0].to_coord[0] == 7:
-                queen = Rainha(piece.linha, piece.coluna, piece.colour, tile_length, piece.moves)
+                queen = Rainha(piece.linha, piece.coluna,
+                               piece.colour, tile_length, piece.moves)
                 self.place_piece(queen, queen.linha, queen.coluna)
 
             self.fifty_moves = 0
