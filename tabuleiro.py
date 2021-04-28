@@ -9,6 +9,7 @@ from move import Move
 from final_screen import *
 from pawn_promotion_screen import *
 
+
 class Tabuleiro(pygame.sprite.Sprite):
     def __init__(self, display):
         super().__init__()
@@ -36,10 +37,12 @@ class Tabuleiro(pygame.sprite.Sprite):
 
         self.black_score = 1290
         self.white_score = 1290
-        self.weights = {Rei: 900, Rainha: 90, Torre: 50, Bispo: 30, Cavalo: 30, Peao: 10}
+        self.weights = {Rei: 900, Rainha: 90,
+                        Torre: 50, Bispo: 30, Cavalo: 30, Peao: 10}
         self.fifty_moves = 0
         self.moves = []
         self.screen_mode = "playing"
+        self.peao_vulneravel = None
 
     def reset(self):
         self.dark_square = pygame.image.load(
@@ -59,8 +62,10 @@ class Tabuleiro(pygame.sprite.Sprite):
         self.jogador_atual = 'white'
         self.turnos = 0
         self.fifty_moves = 0
-        self.piece_selected = None #guarda a peca atualmente selecionada
-        self.possible_moves = [] #guarda os movimentos possiveis da peca atualmente selecionada
+        self.peao_vulneravel = None
+        self.piece_selected = None  # guarda a peca atualmente selecionada
+        # guarda os movimentos possiveis da peca atualmente selecionada
+        self.possible_moves = []
         self.screen_mode = "playing"
 
     def troca_turno(self):
@@ -95,7 +100,7 @@ class Tabuleiro(pygame.sprite.Sprite):
 
             if self.stalemate():
                 self.screen_mode = "draw_stalemate"
-                    
+
     def clear_board(self):
         self.pecas_tabuleiro = [[None for x in range(8)] for x in range(8)]
 
@@ -180,7 +185,7 @@ class Tabuleiro(pygame.sprite.Sprite):
         copy.weights = self.weights
 
         return copy
-    
+
     def get_piece_out_of_check_moves(self, piece):
         for movement in piece.get_movements(self):
             for get_out_of_check_move in self.get_out_of_check_moves:
@@ -189,8 +194,7 @@ class Tabuleiro(pygame.sprite.Sprite):
                     x_move, y_move = movement
                     if(x_move, y_move) == (x_out_of_check, y_out_of_check):
                         return Move([piece.linha, piece.coluna], movement, None)
-        
-    
+
     def get_moves(self):
         moves = []
         for x in range(8):
@@ -202,14 +206,14 @@ class Tabuleiro(pygame.sprite.Sprite):
                     elif self.get_regular_move(piece):
                         moves.append(self.get_regular_move(piece))
         return moves
-    
+
     def get_regular_move(self, piece):
         for movement in piece.get_movements(self):
             if self.get_out_of_check(piece, movement[0], movement[1]):
-                return Move([piece.linha, piece.coluna], movement, None)        
+                return Move([piece.linha, piece.coluna], movement, None)
 
     def move_gets_piece_out_of_check(self, piece, x, y):
-        return (x,y) == (piece.linha, piece.coluna)
+        return (x, y) == (piece.linha, piece.coluna)
 
     def make_move(self, move):
         self.move_ai(move, move.from_coord, move.to_coord)
@@ -249,8 +253,9 @@ class Tabuleiro(pygame.sprite.Sprite):
         self.place_piece(piece, piece.linha, piece.coluna)
 
     def promocao_peao(self):
-        piece_name = PawnPromotionScreen(self.surface, self, self.piece_selected).loop()
-        
+        piece_name = PawnPromotionScreen(
+            self.surface, self, self.piece_selected).loop()
+
         if piece_name == "queen":
             return Rainha(self.piece_selected.linha, self.piece_selected.coluna, self.piece_selected.colour, tile_length, self.piece_selected.moves)
         elif piece_name == "rook":
@@ -258,17 +263,22 @@ class Tabuleiro(pygame.sprite.Sprite):
         elif piece_name == "bishop":
             return Bispo(self.piece_selected.linha, self.piece_selected.coluna, self.piece_selected.colour, tile_length, self.piece_selected.moves)
         elif piece_name == "knight":
-            return Cavalo(self.piece_selected.linha, self.piece_selected.coluna, self.piece_selected.colour, tile_length, self.piece_selected.moves)          
+            return Cavalo(self.piece_selected.linha, self.piece_selected.coluna, self.piece_selected.colour, tile_length, self.piece_selected.moves)
 
     def move(self, linha, coluna):
         self.remove_piece(self.piece_selected.linha,
                           self.piece_selected.coluna)
-        
+
         self.piece_selected.moves += 1
 
         pos_destino = self.get_piece(linha, coluna)
         if pos_destino:
             self.capturar_peca(pos_destino)
+        else:  # en passant
+            if self.piece_selected.name == "pawn" and self.piece_selected.coluna != coluna and self.peao_vulneravel:
+                self.capturar_peca(self.get_piece(
+                    self.piece_selected.linha, coluna))
+                self.remove_piece(self.piece_selected.linha, coluna)
 
         # jogada especial roque
         if self.piece_selected.name == "king" and coluna == (self.piece_selected.coluna + 2):
@@ -276,7 +286,7 @@ class Tabuleiro(pygame.sprite.Sprite):
             self.remove_piece(linha, self.piece_selected.coluna + 3)
             self.place_piece(torre, linha, self.piece_selected.coluna + 1)
             torre.moves += 1
-        
+
         if self.piece_selected.name == "king" and coluna == (self.piece_selected.coluna - 2):
             torre = self.get_piece(linha, self.piece_selected.coluna - 4)
             self.remove_piece(linha, self.piece_selected.coluna - 4)
@@ -287,6 +297,15 @@ class Tabuleiro(pygame.sprite.Sprite):
         if self.piece_selected.name == "pawn":
             if (self.piece_selected.colour == "white" and linha == 0) or (self.piece_selected.colour == "black" and linha == 7):
                 self.piece_selected = self.promocao_peao()
+
+            # en passant
+            print(self.piece_selected.linha)
+            print("\n\n\n\n")
+            print(self.piece_selected.linha + 2)
+            if (self.piece_selected.linha + 2) == linha or (self.piece_selected.linha - 2) == linha:
+                self.peao_vulneravel = self.piece_selected
+            else:
+                self.peao_vulneravel = None
 
         self.place_piece(self.piece_selected, linha, coluna)
         self.troca_turno()
@@ -393,13 +412,15 @@ class Tabuleiro(pygame.sprite.Sprite):
         # nao existem movimentos que tirem o jogador de xeque
         if len(self.get_out_of_check_moves) == 0:
             return True
-
+        print(str(self.get_out_of_check_moves) + "posicoes para sair do check")
         return False
 
     def dead_position(self):
 
-        pecas_brancas = {'rook':2, 'knight':2, 'bishop':2, 'queen':1, 'king':1, 'pawn':8}
-        pecas_pretas = {'rook':2, 'knight':2, 'bishop':2, 'queen':1, 'king':1, 'pawn':8}
+        pecas_brancas = {'rook': 2, 'knight': 2,
+                         'bishop': 2, 'queen': 1, 'king': 1, 'pawn': 8}
+        pecas_pretas = {'rook': 2, 'knight': 2,
+                        'bishop': 2, 'queen': 1, 'king': 1, 'pawn': 8}
         black_draw = False
         white_draw = False
 
@@ -425,10 +446,10 @@ class Tabuleiro(pygame.sprite.Sprite):
         for peca in pecas_brancas:
             if(peca != 'king' and pecas_brancas[peca] != 0):
                 lone_king_white = False
-        
+
                 if(peca != 'bishop'):
                     king_bishop_white = False
-                    
+
                 if(peca != 'knight'):
                     king_knight_white = False
 
@@ -448,7 +469,7 @@ class Tabuleiro(pygame.sprite.Sprite):
 
                 if(peca != 'bishop'):
                     king_bishop_black = False
-                    
+
                 if(peca != 'knight'):
                     king_knight_black = False
 
@@ -459,13 +480,10 @@ class Tabuleiro(pygame.sprite.Sprite):
             black_draw = True
 
         return black_draw and white_draw
-        
+
     def stalemate(self):
         # Se a funcao check_mate retorna true quando o jogador nao estah em xeque um stalemate aconteceu
-        if self.check_mate():
-            return True
-        else:
-            return False
+        return self.check_mate()
 
     def draw(self, surface):
         colour_dict = {True: self.light_square, False: self.dark_square}
@@ -501,10 +519,12 @@ class Tabuleiro(pygame.sprite.Sprite):
                 mv = minimax(aux_board, 2, float('-inf'),
                              float('inf'), True, 'black')
 
-                piece = self.get_piece(mv[0].from_coord[0], mv[0].from_coord[1])
+                piece = self.get_piece(
+                    mv[0].from_coord[0], mv[0].from_coord[1])
                 if piece and piece.name == 'pawn':
                     if mv[0].to_coord[0] == 7:
-                        queen = Rainha(piece.linha, piece.coluna, piece.colour, tile_length, piece.moves)
+                        queen = Rainha(piece.linha, piece.coluna,
+                                       piece.colour, tile_length, piece.moves)
                         self.place_piece(queen, queen.linha, queen.coluna)
 
                     self.fifty_moves = 0
@@ -533,15 +553,17 @@ class Tabuleiro(pygame.sprite.Sprite):
 
         self.screen_mode = "playing"
 
-
     def get_final_screen(self):
         if self.screen_mode == "final_screen":
-            FinalScreen(self.surface, self.jogador_atual, win = True).loop()
+            FinalScreen(self.surface, self.jogador_atual, win=True).loop()
         elif self.screen_mode == "draw_dead_position":
-            FinalScreen(self.surface, self.jogador_atual, win = False, draw_type = "Dead Position").loop()
+            FinalScreen(self.surface, self.jogador_atual,
+                        win=False, draw_type="Dead Position").loop()
         elif self.screen_mode == "draw_fifty_moves":
-            FinalScreen(self.surface, self.jogador_atual, win = False, draw_type = "50 Movimentos").loop()
+            FinalScreen(self.surface, self.jogador_atual,
+                        win=False, draw_type="50 Movimentos").loop()
         elif self.screen_mode == "draw_stalemate":
-            FinalScreen(self.surface, self.jogador_atual, win = False, draw_type = "Afogamento").loop()
+            FinalScreen(self.surface, self.jogador_atual,
+                        win=False, draw_type="Afogamento").loop()
 
         self.screen_mode = "playing"
