@@ -275,7 +275,7 @@ class Tabuleiro(pygame.sprite.Sprite):
         if pos_destino:
             self.capturar_peca(pos_destino)
         else:  # en passant
-            if self.piece_selected.name == "pawn" and self.piece_selected.coluna != coluna:
+            if self.piece_selected.name == "pawn" and self.piece_selected.coluna != coluna and self.peao_vulneravel:
                 self.capturar_peca(self.get_piece(
                     self.piece_selected.linha, coluna))
                 self.remove_piece(self.piece_selected.linha, coluna)
@@ -299,7 +299,10 @@ class Tabuleiro(pygame.sprite.Sprite):
                 self.piece_selected = self.promocao_peao()
 
             # en passant
-            if (self.piece_selected.linha + 2 == linha or self.piece_selected.linha - 2 == linha):
+            print(self.piece_selected.linha)
+            print("\n\n\n\n")
+            print(self.piece_selected.linha + 2)
+            if (self.piece_selected.linha + 2) == linha or (self.piece_selected.linha - 2) == linha:
                 self.peao_vulneravel = self.piece_selected
             else:
                 self.peao_vulneravel = None
@@ -409,7 +412,7 @@ class Tabuleiro(pygame.sprite.Sprite):
         # nao existem movimentos que tirem o jogador de xeque
         if len(self.get_out_of_check_moves) == 0:
             return True
-
+        print(str(self.get_out_of_check_moves) + "posicoes para sair do check")
         return False
 
     def dead_position(self):
@@ -480,10 +483,7 @@ class Tabuleiro(pygame.sprite.Sprite):
 
     def stalemate(self):
         # Se a funcao check_mate retorna true quando o jogador nao estah em xeque um stalemate aconteceu
-        if self.check_mate():
-            return True
-        else:
-            return False
+        return self.check_mate()
 
     def draw(self, surface):
         colour_dict = {True: self.light_square, False: self.dark_square}
