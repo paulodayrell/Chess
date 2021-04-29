@@ -496,10 +496,6 @@ class Tabuleiro(pygame.sprite.Sprite):
                 if self.pecas_tabuleiro[i][j] is not None:
                     surface.blit(
                         self.pecas_tabuleiro[i][j].image, self.position[j*8+i])
-                font = pygame.font.SysFont(None, 30)
-                img = font.render(str(i) + ', ' + str(j),
-                                  True, (255, 255, 255))
-                surface.blit(img, self.position[j*8+i])
 
     def loop(self, type_game):
         framesPerSecond = pygame.time.Clock()
