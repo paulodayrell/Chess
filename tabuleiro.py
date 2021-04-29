@@ -202,7 +202,7 @@ class Tabuleiro(pygame.sprite.Sprite):
                 piece = self.pecas_tabuleiro[x][y]
                 if piece and piece.colour == self.jogador_atual:
                     if self.current_player_check and self.get_piece_out_of_check_moves(piece):
-                        moves.append(self.get_out_of_check_moves_ai(piece))
+                        moves.append(self.get_piece_out_of_check_moves(piece))
                     elif self.get_regular_move(piece):
                         moves.append(self.get_regular_move(piece))
         return moves
